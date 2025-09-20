@@ -6,17 +6,22 @@ from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from api.utils import APIException, generate_sitemap
-from api.models import db
+from api.models import db, User
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
-
+from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../dist/')
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
+CORS(app)
+jwt = JWTManager(app)
 app.url_map.strict_slashes = False
 
 # database condiguration
@@ -66,6 +71,53 @@ def serve_any_other_file(path):
     return response
 
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json(silent=True)
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"success": False, "message": "Faltan credenciales"}), 400
+
+    
+    user = User.query.filter_by(email=email).first()
+
+    if user and bcrypt.check_password_hash(user.password, password): 
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify({"success": True, "message": "Login exitoso","access_token": access_token}), 200
+    else:
+        return jsonify({"success": False, "message": "Credenciales incorrectas"}), 401
+
+
+@app.route('/register', methods=['POST'])
+def handle_register():
+    data = request.get_json(silent=True)
+    email = data.get("email", None)
+    password = data.get("password", None)
+    is_active = data.get("is_active", True)
+    first_name = data.get("first_name", None)
+    last_name = data.get("last_name", None)
+
+    if email is None or password is None or first_name is None or last_name is None:
+        return jsonify({"success": False, "message": "Faltan datos obligatorios"}), 400
+
+    
+    user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
+
+    if user: 
+        return jsonify({"success": False, "message": "El usuario ya existe"}), 400
+    else:
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        data['password'] = hashed_password
+        data['is_active'] = is_active
+        new_user = User.create_user(data)
+        if new_user:
+            return jsonify({"success": True, "message": "Usuario creado exitosamente","user":new_user}), 201
+        else:
+            return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
+    
+    
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
