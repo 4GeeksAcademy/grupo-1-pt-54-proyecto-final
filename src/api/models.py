@@ -17,7 +17,7 @@ class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=True)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -25,7 +25,7 @@ class User(db.Model):
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, default=datetime.now(UTC))
     updated_at: Mapped[DateTime] = mapped_column(
-        DateTime, onupdate=datetime.now(UTC))
+        DateTime, onupdate=datetime.now(UTC),default=datetime.now(UTC))
 
     reading_lists: Mapped["ReadingList"] = relationship(
         back_populates="user", cascade="all, delete-orphan")
@@ -60,7 +60,7 @@ class ReadingList(db.Model):
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, default=datetime.now(UTC))
     updated_at: Mapped[DateTime] = mapped_column(
-        DateTime, onupdate=datetime.now(UTC))
+        DateTime, onupdate=datetime.now(UTC), default=datetime.now(UTC))
 
     books: Mapped[list["Book"]] = relationship(
         back_populates="reading_list", cascade="all, delete-orphan")
@@ -86,7 +86,7 @@ class Book (db.Model):
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, default=datetime.now(UTC))
     updated_at: Mapped[DateTime] = mapped_column(
-        DateTime, onupdate=datetime.now(UTC))
+        DateTime, onupdate=datetime.now(UTC), default=datetime.now(UTC))
 
     reading_list: Mapped["ReadingList"] = relationship(back_populates="books")
 
