@@ -71,7 +71,7 @@ def serve_any_other_file(path):
     return response
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json(silent=True)
     email = data.get("email")
@@ -81,7 +81,7 @@ def login():
         return jsonify({"success": False, "message": "Faltan credenciales"}), 400
 
     
-    user = User.query.filter_by(email=email).first()
+    user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
 
     if user and bcrypt.check_password_hash(user.password, password): 
         access_token = create_access_token(identity=str(user.id))
@@ -90,7 +90,7 @@ def login():
         return jsonify({"success": False, "message": "Credenciales incorrectas"}), 401
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def handle_register():
     data = request.get_json(silent=True)
     email = data.get("email", None)
@@ -99,7 +99,7 @@ def handle_register():
     first_name = data.get("first_name", None)
     last_name = data.get("last_name", None)
 
-    if email is None or password is None or first_name is None or last_name is None:
+    if not email or not password or not first_name or not last_name:
         return jsonify({"success": False, "message": "Faltan datos obligatorios"}), 400
 
     
@@ -113,7 +113,7 @@ def handle_register():
         data['is_active'] = is_active
         new_user = User.create_user(data)
         if new_user:
-            return jsonify({"success": True, "message": "Usuario creado exitosamente","user":new_user}), 201
+            return jsonify({"success": True, "message": "Usuario creado exitosamente","user":new_user.serialize()}), 201
         else:
             return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
     
