@@ -39,6 +39,18 @@ class User(db.Model):
             "last_name": self.last_name,
             "is_active": self.is_active
         }
+    
+    @classmethod
+    def create_user(cls, data):
+        try: 
+            new_user = cls(**data)
+            db.session.add(new_user)
+            db.session.commit()
+            return new_user
+        except Exception as e:
+            print(f"Error creating user: {e}")
+            db.session.rollback()
+            return None
 
 
 class ReadingList(db.Model):
