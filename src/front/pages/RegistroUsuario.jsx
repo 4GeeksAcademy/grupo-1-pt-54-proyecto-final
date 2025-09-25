@@ -1,6 +1,35 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const RegistroUsuario = () => {
+    const [firstName, setFirstname] = useState("");
+    const [lastName, setLastname] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const navigate = useNavigate();
+
+    const handleSubmit  = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ first_name:firstName, last_name:lastName, email, password })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Registro exitoso");
+                navigate("/login");
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            console.error("Error en registro:", error);
+            alert("Hubo un error en la conexión con el servidor.");
+        }
+    };
     return (
         <div
             className="container-fluid px-0 min-vh-100"
@@ -19,9 +48,8 @@ export const RegistroUsuario = () => {
                     />
                 </div>
                 <div className="col-12 col-lg-7 d-flex align-items-center justify-content-center p-4">
-                    <form className="w-100" style={{ maxWidth: "700px" }}>
+                    <form className="w-100" style={{ maxWidth: "700px" }} >
                         <h1 className="mb-4 text-center">Register</h1>
-
                         <div className="form-group mb-3">
                             <label htmlFor="firstnameinput" className="fst-italic">First Name</label>
                             <input
@@ -29,6 +57,8 @@ export const RegistroUsuario = () => {
                                 className="form-control border-2"
                                 id="firstnameinput"
                                 placeholder="Enter First Name"
+                                value={firstName}
+                                onChange={(e) => setFirstname(e.target.value)}
                                 style={{
                                     backgroundColor: "beige",
                                     border: "none",
@@ -44,6 +74,8 @@ export const RegistroUsuario = () => {
                                 className="form-control border-2"
                                 id="lastnameinput"
                                 placeholder="Enter Last Name"
+                                value={lastName}
+                                onChange={(e) => setLastname(e.target.value)}
                                 style={{
                                     backgroundColor: "beige",
                                     border: "none",
@@ -59,6 +91,8 @@ export const RegistroUsuario = () => {
                                 className="form-control border-2"
                                 id="emailinput"
                                 placeholder="Enter email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 style={{
                                     backgroundColor: "beige",
                                     border: "none",
@@ -74,6 +108,8 @@ export const RegistroUsuario = () => {
                                 className="form-control border-2"
                                 id="passwordinput"
                                 placeholder="Enter password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 style={{
                                     backgroundColor: "beige",
                                     border: "none",
@@ -83,11 +119,11 @@ export const RegistroUsuario = () => {
                         </div>
 
                         <div className="text-center">
-                            <Link to="/login">
-                                <button type="submit" className="btn btn-outline-warning">
+                           
+                                <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
                                     Sign Up
                                 </button>
-                            </Link>
+                            
                         </div>
                     </form>
                 </div>
