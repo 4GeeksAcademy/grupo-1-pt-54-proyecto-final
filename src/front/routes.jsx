@@ -38,4 +38,3 @@ export const router = createBrowserRouter(
       <Route path="/recuperacion" element={<Recuperacion />} />
     </Route>
   )
-);
