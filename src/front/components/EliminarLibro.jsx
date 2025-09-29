@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 
 
-export const EliminarLibro = () => {
+export const EliminarLibro = ({ id, onDelete }) => {
     const { id } = useParams();
 
     const deleteBook = async () => {
@@ -12,6 +12,7 @@ export const EliminarLibro = () => {
 
             if (response.ok) {
                 console.log("Book deleted successfully");
+                if (onDelete) onDelete(id);
             } else {
                 console.error("Failed to delete book");
             }
@@ -25,22 +26,22 @@ export const EliminarLibro = () => {
             <button
                 className="btn"
                 data-bs-toggle="modal"
-                data-bs-target="#confirmation"
+                data-bs-target={`#confirmation-${id}`}
             >
                 <i className="fa-solid fa-trash"></i>
             </button>
 
             <div
                 className="modal fade"
-                id="confirmation"
+                id={`#confirmation-${id}`}
                 tabIndex="-1"
-                aria-labelledby="confirmationTitle"
+                aria-labelledby={`#confirmation-${id}`}
                 aria-hidden="true"
             >
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h1 className="modal-title fs-5" id="confirmationTitle">REMOVE</h1>
+                            <h1 className="modal-title fs-5" id={`#confirmation-${id}`}>REMOVE</h1>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                         </div>
                         <div className="modal-body">
