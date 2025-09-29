@@ -6,14 +6,12 @@ import {
   Route,
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
-import { Home } from "./pages/Home";
-import { Single } from "./pages/Single";
-import { Demo } from "./pages/Demo";
 import { RegistroUsuario } from "./pages/RegistroUsuario";
 import { Login } from "./pages/Login";
 import { LandingPage } from "./pages/LandingPage";
 import { Recuperacion } from "./pages/Recuperacion";
 import { LibroIndividual } from "./components/LibroIndividual";
+import { EliminarLibro } from "./components/EliminarLibro";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,12 +27,11 @@ export const router = createBrowserRouter(
       <Route index element={<LandingPage />} />
 
       {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-      <Route path="/libro-individual/:theId" element={<LibroIndividual />} />
+      <Route path="/libro-individual/:id" element={<LibroIndividual />} />
       <Route path="/dashboard" element={<LibroIndividual />} />
       <Route path="/registro-usuario" element={<RegistroUsuario />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/single/:theId" element={<Single />} />  {/* Dynamic route for single items */}
-      <Route path="/demo" element={<Demo />} />
       <Route path="/recuperacion" element={<Recuperacion />} />
+      <Route path="/eliminar-libro" element={<EliminarLibro />} />
     </Route>
-  )
+  ))
