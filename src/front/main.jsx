@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import Scrollbar from './components/Scrollbar';
+import {Scrollbar} from './components/Scrollbar';
 import './index.css'  // Global styles for your application
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration

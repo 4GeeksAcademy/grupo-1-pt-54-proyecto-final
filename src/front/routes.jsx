@@ -12,6 +12,7 @@ import { Demo } from "./pages/Demo";
 import { RegistroUsuario } from "./pages/RegistroUsuario";
 import {Login} from "./pages/Login";
 import {LandingPage} from "./pages/LandingPage" ;
+import {SearchComponent} from "./components/SearchComponent";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -31,6 +32,7 @@ export const router = createBrowserRouter(
         <Route path= "/login" element={<Login />} />
         <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
         <Route path="/demo" element={<Demo />} />
+        <Route path="/search-component" element={<SearchComponent />} />
       </Route>
     )
 );
