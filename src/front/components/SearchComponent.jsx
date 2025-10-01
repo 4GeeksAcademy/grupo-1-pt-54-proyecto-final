@@ -8,7 +8,7 @@ export const SearchComponent= () =>  {
   const [suggestions, setSuggestions] = useState([]);
 
   const librosLocal = [
-    { id: 1, titulo: "", autor: "" },
+    { id: 1, titulo: " ", autor: " " },
   ];
 
   const URL = "https://openlibrary.org/search.json";
