@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { RegistroUsuario } from "./pages/RegistroUsuario";
+import {SearchComponent} from "./components/SearchComponent";
 import { Login } from "./pages/Login";
 import { LandingPage } from "./pages/LandingPage";
 import { Recuperacion } from "./pages/Recuperacion";
@@ -26,12 +27,13 @@ export const router = createBrowserRouter(
 
       <Route index element={<LandingPage />} />
 
-      {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-      <Route path="/libro-individual/:id" element={<LibroIndividual />} />
-      <Route path="/dashboard" element={<LibroIndividual />} />
-      <Route path="/registro-usuario" element={<RegistroUsuario />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/recuperacion" element={<Recuperacion />} />
-      <Route path="/eliminar-libro" element={<EliminarLibro />} />
+        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
+        <Route path="/search-component" element={<SearchComponent />} />
+        <Route path="/libro-individual/:id" element={<LibroIndividual />} />
+        <Route path="/dashboard" element={<LibroIndividual />} />
+        <Route path="/registro-usuario" element={<RegistroUsuario />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/recuperacion" element={<Recuperacion />} />
+        <Route path="/eliminar-libro" element={<EliminarLibro />} />
     </Route>
   ))
