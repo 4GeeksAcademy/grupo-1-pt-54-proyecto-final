@@ -7,7 +7,7 @@ function App() {
     { id: 1, title: "The Black Cat", author: "Edgar Allan Poe", status: "No leído", progress: 0 },
     { id: 2, title: "Annabel Lee", author: "Edgar Allan Poe", status: "No leído", progress: 0 },
     { id: 3, title: "IT", author: "Stephen King", status: "No leído", progress: 0 },
-    { id: 4, title: "The Picture of Dorian Gray", author: "Oscar Wilde", stagit tus: "No leído", progress: 0 },
+    { id: 4, title: "The Picture of Dorian Gray", author: "Oscar Wilde",  status: "No leído", progress: 0 },
     { id: 5, title: "Carrie", author: "Stephen King", status: "No leído", progress: 0 }
   ]);
 
