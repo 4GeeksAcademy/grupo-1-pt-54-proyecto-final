@@ -1,11 +1,10 @@
-import SearchComponent from './SearchComponent';
 
+import BookApp from "./BookApp";
 
 function Scrollbar() {
     return (
         <div className='container-fuid'>
-            <h2 className='text-center'>Reach search</h2>
-            <SearchComponent />
+            <BookApp/>
         </div>
     );
 }
