@@ -1,8 +1,9 @@
+
 import { useParams } from "react-router-dom";
 
 
 export const EliminarLibro = ({ id, onDelete }) => {
-    const { id } = useParams();
+   // const { id } = useParams();
 
     const deleteBook = async () => {
         try {
