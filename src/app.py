@@ -117,6 +117,30 @@ def handle_register():
         else:
             return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
     
+@app.route('/api/reset-password', methods=['PUT'])
+def reset_password():
+    data = request.get_json(silent=True)
+    token = data.get("token")
+    nueva_password = data.get("nueva_password")
+
+    if not token or not nueva_password:
+        return jsonify({"success": False, "message": "Faltan datos"}), 400
+
+    user = db.session.execute(db.select(User).filter_by(reset_code=token)).scalar_one_or_none()
+
+    if not user:
+        return jsonify({"success": False, "message": "Token inválido o expirado"}), 400
+
+    hashed_password = bcrypt.generate_password_hash(nueva_password).decode('utf-8')
+    user.password = hashed_password
+
+    user.reset_code = None
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Contraseña actualizada correctamente"
+    }), 200
     
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
