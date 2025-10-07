@@ -1,11 +1,8 @@
-
+import React from "react";
 import BookApp from "./BookApp";
 
-function Scrollbar() {
-    return (
-        <div className='container-fuid'>
-            <BookApp/>
-        </div>
-    );
+function App() {
+  return <BookApp />;
 }
-export default Scrollbar;
+
+export default App;
