@@ -12,12 +12,12 @@ export const Layout = () => {
     const isLoginPath = location.pathname == "/login" ? true : false
     const isLandingPage = location.pathname == "/" ? true : false
     const isLibroIndividual = location.pathname == "/libro-individual/1" ? true : false
-
+    const isRecuperacion = location.pathname == "/recuperacion" ? true : false
 
     /*use condicional to not show navbar y footer in other  ==*/
     return (
         <ScrollToTop>
-            {isRegisterPath || isLoginPath || isLandingPage ? "" : isLibroIndividual ? <NavbarLibroIndividual /> : <Navbar />}
+            {isRegisterPath || isLoginPath || isLandingPage || isRecuperacion ? "" : isLibroIndividual ? <NavbarLibroIndividual /> : <Navbar />}
             <Outlet />
             {isRegisterPath || isLoginPath ? "" : <Footer />}
         </ScrollToTop>

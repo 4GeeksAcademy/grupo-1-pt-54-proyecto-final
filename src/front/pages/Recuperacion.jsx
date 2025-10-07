@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export const Recuperacion = () => {
     const [email, setEmail] = useState('');
@@ -187,7 +188,7 @@ const NuevaContrasena = ({ email }) => {
                         </form>
                         
                         <div className="text-center mt-3">
-                            <a href="#" className="text-decoration-none">Volver al Inicio de sesión</a>
+                            <Link to="/login" className="text-decoration-none">Volver al Inicio de sesión</Link>
                         </div>
                     </div>
                 </div>
