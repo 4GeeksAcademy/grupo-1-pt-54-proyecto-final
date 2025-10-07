@@ -1,131 +1,80 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-
-export const SearchComponent= () =>  {
-  const [books, setBooks] = useState([]);
+const SearchBar = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-
-  const librosLocal = [
-    { id: 1, titulo: " ", autor: " " },
-  ];
-
+  const [results, setResults] = useState([]);
   const URL = "https://openlibrary.org/search.json";
 
-  const coverUrlFrom = (cover_i) =>
-    cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg` : "/placeholder-book.png";
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
 
-  const showData = async (query = "") => {
-  
-  
     try {
-    const trimmed = query.trim();
-    if (trimmed.length < 2) {
-      setBooks([]);
-      setMensaje("Ingresa al menos 2 caracteres para buscar.");
-      return;
-    }
-
-    const resp = await fetch(
-      `${URL}?q=${encodeURIComponent(trimmed)}&limit=12`
-    );
-    
-      if (!resp.ok) {
-      throw new Error(`Error ${resp.status}: ${resp.statusText}`);
-      }
-
-      const data = await resp.json();
-
-      if (data.docs && data.docs.length > 0) {
-        const normalized = data.docs.map((d, idx) => ({
-          id: d.key || `${d.title}-${idx}`,
-          title: d.title,
-          authors: d.author_name ? d.author_name.join(", ") : "Autor desconocido",
-          cover_i: d.cover_i || null,
-        }));
-        setBooks(normalized);
-        setMensaje("");
-      } else {
-        setBooks([]);
-        setMensaje("No se encontraron resultados.");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setMensaje("Error al obtener datos. Revisa la consola.");
-    }
-  };
-
-  const searcher = (e) => {
-    const value = e.target.value;
-    setSearch(value);
-
-    if (value.trim() === "") {
-      setSuggestions([]);
-    } else {
-      const filtered = librosLocal.filter((libro) =>
-        libro.titulo.toLowerCase().includes(value.toLowerCase())
+      const response = await fetch(
+        `${URL}?q=${encodeURIComponent(search)}&limit=10&fields=title,author_name`
       );
-      setSuggestions(filtered);
+      const data = await response.json();
+      setResults(data.docs || []);
+    } catch (error) {
+      console.error("Error al buscar libros:", error);
     }
-
-    showData(value);
   };
-
-  const pickSuggestion = (libro) => {
-    setSearch(libro.titulo);
-    setSuggestions([]);
-    showData(libro.titulo);
-  };
-
-  useEffect(() => {
-    showData("tolstoy");
-  }, []);
 
   return (
-    <div className="search-root">
-      <div className="search-bar-container">
+    <div>
+      <form onSubmit={handleSearch} className="d-flex mb-3">
         <input
-          value={search}
-          onChange={searcher}
           type="text"
-          placeholder="Buscar título o autor..."
-          className="search-input"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Busca por título o autor"
+          className="form-control me-2"
         />
-      </div>
+        <button type="submit" className="btn btn-success">
+          Buscar
+        </button>
+      </form>
 
-      {suggestions.length > 0 && (
-        <ul className="suggestions-list">
-          {suggestions.map((s) => (
-            <li key={s.id} onClick={() => pickSuggestion(s)} className="suggestion-item">
-              <strong>{s.titulo}</strong> <span className="suggest-author">por {s.autor}</span>
-            </li>
-          ))}
-        </ul>
+      {results.length > 0 && (
+        <table className="table table-striped table-hover shadow-lg">
+          <thead>
+            <tr className="bg-dark text-white">
+              <th>Título</th>
+              <th>Autor</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((book, index) => (
+              <tr key={index}>
+                <td>{book.title}</td>
+                <td>
+                  {book.author_name
+                    ? book.author_name.join(", ")
+                    : "Autor desconocido"}
+                </td>
+                <td>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() =>
+                      onAddBook({
+                        title: book.title,
+                        author: book.author_name
+                          ? book.author_name[0]
+                          : "Autor desconocido",
+                      })
+                    }
+                  >
+                    ➕ Agregar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
-
-      {mensaje && <p className="mensaje">{mensaje}</p>}
-
-      <div className="books-list">
-        {books.map((b) => (
-          <div key={b.id} className="book-card">
-            <div className="book-cover">
-              <img
-                src={coverUrlFrom(b.cover_i)}
-                alt={b.title}
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder-book.png";
-                }}
-              />
-            </div>
-            <div className="book-body">
-              <h3 className="book-title">{b.title}</h3>
-              <p className="book-author">by {b.authors}</p>
-              
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
-}
+};
+
+export default SearchBar;
