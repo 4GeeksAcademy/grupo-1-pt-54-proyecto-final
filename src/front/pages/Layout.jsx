@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom/dist"
 import ScrollToTop from "../components/ScrollToTop"
 import { Navbar } from "../components/Navbar"
+import { NavbarLibroIndividual } from "../components/NavbarLibroIndividual"
 import { Footer } from "../components/Footer"
 import { useLocation } from "react-router-dom"
 
@@ -10,11 +11,13 @@ export const Layout = () => {
     const isRegisterPath = location.pathname == "/registro-usuario" ? true : false
     const isLoginPath = location.pathname == "/login" ? true : false
     const isLandingPage = location.pathname == "/" ? true : false
+    const isLibroIndividual = location.pathname == "/libro-individual/1" ? true : false
+
 
     /*use condicional to not show navbar y footer in other  ==*/
     return (
         <ScrollToTop>
-            {isRegisterPath || isLoginPath || isLandingPage ? "" : <Navbar />}
+            {isRegisterPath || isLoginPath || isLandingPage ? "" : isLibroIndividual ? <NavbarLibroIndividual /> : <Navbar />}
             <Outlet />
             {isRegisterPath || isLoginPath ? "" : <Footer />}
         </ScrollToTop>
