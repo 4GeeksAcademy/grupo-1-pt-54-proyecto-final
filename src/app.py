@@ -12,7 +12,7 @@ from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -142,7 +142,68 @@ def reset_password():
         "message": "Contraseña actualizada correctamente"
     }), 200
     
-# this only runs if `$ python src/main.py` is executed
-if __name__ == '__main__':
+@app.route('/api/books/<int:book_id>', methods=['PUT'])
+@jwt_required()
+def update_book_state(book_id):
+    user_id = int(get_jwt_identity())
+    data = request.get_json(silent=True)
+    nuevo_estado = data.get("state")
+
+    estados_validos = ["en_proceso", "en_espera", "finalizado"]
+
+    if nuevo_estado not in estados_validos:
+        return jsonify({"success": False, "message": "Estado no válido"}), 400
+
+    from api.models import Book
+    book = db.session.execute(db.select(Book).filter_by(id=book_id)).scalar_one_or_none()
+    if not book:
+        return jsonify({"success": False, "message": "Libro no encontrado"}), 404
+
+    if book.user_id != user_id:
+        return jsonify({"success": False, "message": "No tienes permiso para modificar este libro"}), 403
+
+    try:
+        book.state = nuevo_estado
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "message": "Estado del libro actualizado correctamente",
+            "book": {
+                "id": book.id,
+                "title": book.title,
+                "state": book.state
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": "Error al actualizar el estado"}), 500
+
+
+@app.route('/api/books/<int:book_id>', methods=['DELETE'])
+@jwt_required()
+def delete_book(book_id):
+    user_id = int(get_jwt_identity())
+
+    from api.models import Book
+    book = db.session.execute(db.select(Book).filter_by(id=book_id)).scalar_one_or_none()
+    if not book:
+        return jsonify({"success": False, "message": "Libro no encontrado"}), 404
+
+    if book.user_id != user_id:
+        return jsonify({"success": False, "message": "No puedes eliminar este libro"}), 403
+
+    try:
+        db.session.delete(book)
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "message": f"Libro '{book.title}' eliminado correctamente"
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
+    
+# this only runs if ⁠ $ python src/main.py ⁠ is executed
+if __name__ == '_main_':
     PORT = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=PORT, debug=True)
