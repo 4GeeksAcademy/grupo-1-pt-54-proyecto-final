@@ -17,8 +17,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
-    os.path.realpath(_file_)), '../dist/')
-app = Flask(_name_)
+    os.path.realpath(__file__)), '../dist/')
+app = Flask(__name__)
 bcrypt = Bcrypt(app)
 CORS(app)
 jwt = JWTManager(app)
@@ -204,6 +204,6 @@ def delete_book(book_id):
         return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
     
 # this only runs if ⁠ $ python src/main.py ⁠ is executed
-if _name_ == '_main_':
+if __name__ == '_main_':
     PORT = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=PORT, debug=True)
