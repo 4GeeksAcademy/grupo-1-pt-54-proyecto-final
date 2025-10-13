@@ -1,47 +1,39 @@
 import React from "react";
 
-function BookCard({ book, updateBookStatus }) {
-  const handleStartReading = () => {
-    if (book.status === "No leído") {
-      updateBookStatus(book.id, "En progreso", 10); // inicia con 10%
-    }
-  };
+const BookCard = ({ book, onAddBook }) => {
+  const coverUrl = book.cover_i
+    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+    : "/placeholder-book.png";
 
-  const handleProgress = () => {
-    if (book.status === "En progreso" && book.progress < 100) {
-      const newProgress = book.progress + 20;
-      if (newProgress >= 100) {
-        updateBookStatus(book.id, "Leído", 100);
-      } else {
-        updateBookStatus(book.id, "En progreso", newProgress);
-      }
-    }
+  const handleAdd = () => {
+ 
+    onAddBook({
+      title: book.title,
+      author: book.authors || "Autor desconocido",
+      status: "Por leer",
+      cover_i: book.cover_i || null,
+    });
   };
 
   return (
-    <div className="book-card">
-      <h3>{book.title}</h3>
-      <p className="author">{book.author}</p>
-      <p className={`status ${book.status.replace(" ", "-").toLowerCase()}`}>
-        {book.status}
-      </p>
-
-      {book.status === "En progreso" && (
-        <div className="progress-bar">
-          <div style={{ width: `${book.progress}%` }}></div>
-        </div>
-      )}
-
-      <div className="buttons">
-        {book.status === "No leído" && (
-          <button onClick={handleStartReading}>📖 Empezar</button>
-        )}
-        {book.status === "En progreso" && (
-          <button onClick={handleProgress}>➡️ Avanzar</button>
-        )}
+    <div className="card shadow-sm m-2" style={{ width: "180px" }}>
+      <img
+        src={coverUrl}
+        alt={book.title}
+        className="card-img-top"
+        onError={(e) => (e.currentTarget.src = "/placeholder-book.png")}
+      />
+      <div className="card-body text-center">
+        <h6 className="card-title">{book.title}</h6>
+        <p className="card-text text-muted" style={{ fontSize: "0.9em" }}>
+          {book.authors}
+        </p>
+        <button className="btn btn-primary btn-sm" onClick={handleAdd}>
+          ➕ Agregar
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default BookCard;
