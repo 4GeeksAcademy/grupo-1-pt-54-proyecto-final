@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo} from "react";
+import debounce from "lodash.debounce";
 
 export const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
@@ -48,11 +49,11 @@ export const SearchComponent = ({ onAddBook }) => {
       setMensaje("Error al obtener datos. Revisa la consola.");
     }
   };
-
+  const debouncedSearch= useMemo(()=>debounce(showData,500),[])
   const searcher = (e) => {
     const value = e.target.value;
     setSearch(value);
-    showData(value);
+    debouncedSearch(value);
   };
 
   const pickSuggestion = (book) => {
@@ -61,9 +62,7 @@ export const SearchComponent = ({ onAddBook }) => {
     setBooks([book]);
   };
 
-  useEffect(() => {
-    showData("tolstoy");
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <div className="search-root">
