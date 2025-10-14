@@ -34,7 +34,7 @@ def search_books():
 
     try:
         query = urllib.parse.quote(title)
-        url = f"https://openlibrary.org/search.json?q={query}&limit=12"
+        url = f"https://openlibrary.org/search.json?q={query}&limit=5"
 
         with urllib.request.urlopen(url) as response:
             raw_data = response.read()
@@ -42,12 +42,23 @@ def search_books():
 
         books = []
         for idx, item in enumerate(data.get("docs", [])):
+
+            with urllib.request.urlopen(f"https://openlibrary.org{item.get("key")}.json") as response:
+                work_raw_data = response.read()
+                work_data = json.loads(work_raw_data)
+                desc = work_data.get("description")
+                if isinstance(desc, dict):
+                    description=desc.get("value")
+                else:
+                    description=desc
+
             books.append({
                 "id": item.get("key") or f"{item.get('title', 'unknown')}-{idx}",
                 "title": item.get("title", "Sin titulo"),
                 "authors": ", ".join(item.get("author_name", ["Autor desconocido"])),
                 "cover_i": item.get("cover_i"),
-                "cover_url": f"https://covers.openlibrary.org/b/id/{item['cover_i']}-L.jpg" if item.get("cover_i") else None
+                "cover_url": f"https://covers.openlibrary.org/b/id/{item['cover_i']}-L.jpg" if item.get("cover_i") else None,
+                "description": description or "Descripcion no disponible"
             })
 
         return jsonify({"success": True, "results": books}), 200
