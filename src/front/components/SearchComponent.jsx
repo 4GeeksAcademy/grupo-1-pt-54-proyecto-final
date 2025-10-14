@@ -1,54 +1,48 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
   const [books, setBooks] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
-  const librosLocal = [
-    { id: 1, titulo: " ", autor: " " },
-  ];
 
-  const URL = "https://openlibrary.org/search.json";
+  const ENDPOINT = "/api/books/search";
+  const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
   const coverUrlFrom = (cover_i) =>
-    cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg` : "/placeholder-book.png";
+    cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg` : "/placeholder-book.png";
 
   const showData = async (query = "") => {
-
 
     try {
       const trimmed = query.trim();
       if (trimmed.length < 2) {
         setBooks([]);
+        setSuggestions([]);
         setMensaje("Ingresa al menos 2 caracteres para buscar.");
         return;
       }
 
-      const resp = await fetch(
-        `${URL}?q=${encodeURIComponent(trimmed)}&limit=12`
-      );
-
+      const resp = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${encodeURIComponent(trimmed)}`);
+      if (resp.status === 304) {
+        console.log("Response 304: Not Modified — reusing previous results.");
+        return;
+      }
       if (!resp.ok) {
         throw new Error(`Error ${resp.status}: ${resp.statusText}`);
       }
 
       const data = await resp.json();
-
-      if (data.docs && data.docs.length > 0) {
-        const normalized = data.docs.map((d, idx) => ({
-          id: d.key || `${d.title}-${idx}`,
-          title: d.title,
-          authors: d.author_name ? d.author_name.join(", ") : "Autor desconocido",
-          cover_i: d.cover_i || null,
-        }));
-        setBooks(normalized);
+      if (data.success && data.results.length > 0) {
+        setBooks(data.results);
+        setSuggestions(data.results);
         setMensaje("");
       } else {
         setBooks([]);
-        setMensaje("No se encontraron resultados.");
+        setSuggestions([]);
+        setMensaje(data.message || "No se encontraron resultados.");
       }
+
     } catch (error) {
       console.error("Error fetching data:", error);
       setMensaje("Error al obtener datos. Revisa la consola.");
@@ -58,23 +52,13 @@ export const SearchComponent = ({ onAddBook }) => {
   const searcher = (e) => {
     const value = e.target.value;
     setSearch(value);
-
-    if (value.trim() === "") {
-      setSuggestions([]);
-    } else {
-      const filtered = librosLocal.filter((libro) =>
-        libro.titulo.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestions(filtered);
-    }
-
     showData(value);
   };
 
-  const pickSuggestion = (libro) => {
-    setSearch(libro.titulo);
+  const pickSuggestion = (book) => {
+    setSearch(book.title);
     setSuggestions([]);
-    showData(libro.titulo);
+    setBooks([book]);
   };
 
   useEffect(() => {
@@ -92,17 +76,7 @@ export const SearchComponent = ({ onAddBook }) => {
           className="search-input"
         />
       </div>
-
-      {suggestions.length > 0 && (
-        <ul className="suggestions-list">
-          {suggestions.map((s) => (
-            <li key={s.id} onClick={() => pickSuggestion(s)} className="suggestion-item">
-              <strong>{s.titulo}</strong> <span className="suggest-author">por {s.autor}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
+      
       {mensaje && <p className="mensaje">{mensaje}</p>}
 
       <div className="books-list">
@@ -122,20 +96,18 @@ export const SearchComponent = ({ onAddBook }) => {
               <p className="book-author">by {b.authors}</p>
 
             </div>
-            <div> 
+            <div>
               <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() =>
-                      onAddBook({
-                        title: book.title,
-                        author: book.author_name
-                          ? book.author_name[0]
-                          : "Autor desconocido",
-                      })
-                    }
-                  >
-                    ➕ Agregar
-                  </button>
+                className="btn btn-primary btn-sm"
+                onClick={() =>
+                  onAddBook({
+                    title: b.title,
+                    author: b.authors || "Autor desconocido",
+                  })
+                }
+              >
+                ➕ Agregar
+              </button>
             </div>
           </div>
         ))}
