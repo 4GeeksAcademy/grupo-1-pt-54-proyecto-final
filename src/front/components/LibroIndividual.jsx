@@ -5,14 +5,14 @@ export const LibroIndividual = () => {
   const { id } = useParams();
   const [libro, setLibro] = useState(null);
   const [progreso, setProgreso] = useState(0);
-  const [status, setStatus] = useState("No leído");
+  const [estado, setEstado] = useState("No leído");
 
   const fetchLibro = async () => {
     try {
       const response = await fetch(`api/books/${id}`);
       const data = await response.json();
       setLibro(data);
- 
+
       if (data.progreso) {
         setProgreso(data.progreso);
         actualizarEstado(data.progreso);
@@ -24,15 +24,15 @@ export const LibroIndividual = () => {
   };
 
   const actualizarEstado = (valor) => {
-    if (valor === 0) setStatus("No leído");
-    else if (valor > 0 && valor < 100) setStatus("En progreso");
-    else setStatus("Leído");
+    if (valor === 0) setEstado("No leído");
+    else if (valor > 0 && valor < 100) setEstado("En progreso");
+    else setEstado("Leído");
   };
 
-  const handleProgressChange = (e) => {
-    const valor = Number(e.target.value);
-    setProgreso(valor);
-    actualizarEstado(valor);
+  const handleProgresoChange = (e) => {
+    const nuevoValor = Number(e.target.value);
+    setProgreso(nuevoValor);
+    actualizarEstado(nuevoValor);
   };
 
   useEffect(() => {
@@ -42,34 +42,78 @@ export const LibroIndividual = () => {
   if (!libro) return <p>Cargando libro...</p>;
 
   return (
-    <div className="libro-container">
-      <div className="libro-imagen">
-        <img src={libro.image} alt="portada de libro" className="portada" />
+    <div className="container row align-items-center" style={{ justifySelf: "center" }}>
+      <div
+        className="col-4 col-lg-5"
+        style={{ textAlign: "center" }}
+      >
+        <img
+          src={libro.image}
+          alt="portada de libro"
+          className="img-fluid"
+          style={{ borderRadius: "8px" }}
+        />
       </div>
 
-      <div className="libro-detalles">
-        <h1 className="titulo">{libro.title}</h1>
-        <h2 className="autor">{libro.author}</h2>
+      <div
+        className="col-7"
+        style={{
+          justifyItems: "center",
+          fontFamily: "'M PLUS 2', sans-serif",
+          color: "darkolivegreen",
+        }}
+      >
+        <h1 className="mb-3 fw-medium" style={{ marginBottom: "14px" }}>
+          {libro.title}
+        </h1>
+        <h6
+          className="mb-3 fw-medium"
+          style={{ fontSize: "xx-large", marginBottom: "14px" }}
+        >
+          {libro.author}
+        </h6>
 
-        {/* Aquí adaptamos el progreso */}
-        <div className="progreso-section">
-          <label htmlFor="barra-progreso" className="status-label">
-            Estado: <span className={`estado ${status.replace(" ", "").toLowerCase()}`}>{status}</span>
+        <div style={{ marginBottom: "25px" }}>
+          <label htmlFor="progreso" style={{ fontSize: "large", color: "darkslategray" }}>
+            Estado:{" "}
+            <strong
+              style={{
+                color:
+                  estado === "Leído"
+                    ? "green"
+                    : estado === "En progreso"
+                    ? "orange"
+                    : "gray",
+              }}
+            >
+              {estado}
+            </strong>
           </label>
-
           <input
             type="range"
-            id="barra-progreso"
+            id="progreso"
             min="0"
             max="100"
             value={progreso}
-            onChange={handleProgressChange}
-            className="barra-progreso"
+            onChange={handleProgresoChange}
+            style={{
+              width: "100%",
+              marginTop: "10px",
+              accentColor: "darkolivegreen",
+              cursor: "pointer",
+            }}
           />
-          <span className="progreso-texto">{progreso}%</span>
+          <p style={{ textAlign: "right", fontSize: "small", color: "#555" }}>
+            {progreso}%
+          </p>
         </div>
 
-        <p className="sinopsis">{libro.sinopsis || "Sin sinopsis disponible."}</p>
+        <h4
+          className="display-4 blockquote"
+          style={{ textAlign: "justify" }}
+        >
+          {libro.sinopsis || "Sin sinopsis disponible."}
+        </h4>
       </div>
     </div>
   );
