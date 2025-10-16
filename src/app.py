@@ -12,7 +12,7 @@ from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -117,30 +117,33 @@ def handle_register():
         else:
             return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
     
-@app.route('/api/reset-password', methods=['PUT'])
-def reset_password():
-    data = request.get_json(silent=True)
-    token = data.get("token")
-    nueva_password = data.get("nueva_password")
+@app.route('/api/reset-password/<token>', methods=['POST'])
+def handle_reset_password(token):
+    try:
+        decoded_data = decode_token(token)
+        data = request.get_json(silent=True)
+        new_password = data.get("password", None)
+        print(new_password)
+        email = decoded_data.get("sub")
 
-    if not token or not nueva_password:
-        return jsonify({"success": False, "message": "Faltan datos"}), 400
+        user = db.session.execute(
+            db.select(User).filter_by(email=email)
+        ).scalar_one_or_none()
 
-    user = db.session.execute(db.select(User).filter_by(reset_code=token)).scalar_one_or_none()
+        if not user:
+            return jsonify({"msg": "Usuario no encontrado"}), 404
 
-    if not user:
-        return jsonify({"success": False, "message": "Token inválido o expirado"}), 400
+        password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        user.password = password_hash
 
-    hashed_password = bcrypt.generate_password_hash(nueva_password).decode('utf-8')
-    user.password = hashed_password
+        db.session.commit()
 
-    user.reset_code = None
-    db.session.commit()
+        return jsonify({"msg": "Contraseña actualizada"}), 200
 
-    return jsonify({
-        "success": True,
-        "message": "Contraseña actualizada correctamente"
-    }), 200
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({"msg": "Token inválido"}), 400
     
 @app.route('/api/books/<int:book_id>', methods=['PUT'])
 @jwt_required()
@@ -204,6 +207,6 @@ def delete_book(book_id):
         return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
     
 # this only runs if ⁠ $ python src/main.py ⁠ is executed
-if __name__ == '_main_':
+if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=PORT, debug=True)
