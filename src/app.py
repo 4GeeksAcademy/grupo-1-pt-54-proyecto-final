@@ -62,6 +62,8 @@ def sitemap():
     return send_from_directory(static_file_dir, 'index.html')
 
 # any other endpoint will try to serve it like a static file
+
+
 @app.route('/<path:path>', methods=['GET'])
 def serve_any_other_file(path):
     if not os.path.isfile(os.path.join(static_file_dir, path)):
@@ -80,12 +82,12 @@ def login():
     if not email or not password:
         return jsonify({"success": False, "message": "Faltan credenciales"}), 400
 
-    
-    user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
+    user = db.session.execute(db.select(User).filter_by(
+        email=email)).scalar_one_or_none()
 
-    if user and bcrypt.check_password_hash(user.password, password): 
+    if user and bcrypt.check_password_hash(user.password, password):
         access_token = create_access_token(identity=str(user.id))
-        return jsonify({"success": True, "message": "Login exitoso","access_token": access_token}), 200
+        return jsonify({"success": True, "message": "Login exitoso", "access_token": access_token}), 200
     else:
         return jsonify({"success": False, "message": "Credenciales incorrectas"}), 401
 
@@ -102,23 +104,26 @@ def handle_register():
     if not email or not password or not first_name or not last_name:
         return jsonify({"success": False, "message": "Faltan datos obligatorios"}), 400
 
-    
-    user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
+    user = db.session.execute(db.select(User).filter_by(
+        email=email)).scalar_one_or_none()
 
-    if user: 
+    if user:
         return jsonify({"success": False, "message": "El usuario ya existe"}), 400
     else:
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(
+            password).decode('utf-8')
         data['password'] = hashed_password
         data['is_active'] = is_active
         new_user = User.create_user(data)
         if new_user:
-            return jsonify({"success": True, "message": "Usuario creado exitosamente","user":new_user.serialize()}), 201
+            return jsonify({"success": True, "message": "Usuario creado exitosamente", "user": new_user.serialize()}), 201
         else:
             return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
-    
+
+
 @app.route('/api/reset-password/<token>', methods=['POST'])
 def handle_reset_password(token):
+
     try:
         decoded_data = decode_token(token)
         data = request.get_json(silent=True)
@@ -133,7 +138,8 @@ def handle_reset_password(token):
         if not user:
             return jsonify({"msg": "Usuario no encontrado"}), 404
 
-        password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        password_hash = bcrypt.generate_password_hash(
+            new_password).decode('utf-8')
         user.password = password_hash
 
         db.session.commit()
