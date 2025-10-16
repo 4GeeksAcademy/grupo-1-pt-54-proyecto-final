@@ -1,8 +1,8 @@
 import React from "react";
 import BookApp from "./BookApp";
 
-function Scrollbar() {
+function App() {
   return <BookApp />;
 }
 
-export default Scrollbar;
+export default App;

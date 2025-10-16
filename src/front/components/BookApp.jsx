@@ -26,19 +26,21 @@ const BookApp = () => {
   };
 
   const handleRemoveBook = (book) => {
-    const updatedBooks = myBooks.filter(
-      (b) => !(b.title === book.title && b.author === book.author)
+    setMyBooks((prev) =>
+      prev.filter(
+        (b) => !(b.title === book.title && b.author === book.author)
+      )
     );
-    setMyBooks(updatedBooks);
   };
 
   const handleUpdateProgress = (book, newProgress) => {
-    const updated = myBooks.map((b) =>
-      b.title === book.title && b.author === book.author
-        ? { ...b, progress: newProgress }
-        : b
+    setMyBooks((prev) =>
+      prev.map((b) =>
+        b.title === book.title && b.author === book.author
+          ? { ...b, progress: newProgress }
+          : b
+      )
     );
-    setMyBooks(updated);
   };
 
   return (

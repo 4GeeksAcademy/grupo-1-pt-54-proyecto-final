@@ -1,140 +1,135 @@
-import React, { useState, useEffect } from "react";
-import BookCard from "./BookCard";
+import { useState, useEffect, useMemo } from "react";
+import debounce from "lodash.debounce";
+import BookList from "./BookList"; 
 
 export const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
+  const [books, setBooks] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [myBooks, setMyBooks] = useState([]); 
 
-  const BASE_API_URL = import.meta.env.VITE_BACKEND_URL || "";
   const ENDPOINT = "/api/books/search";
-  const FALLBACK_URL = "https://openlibrary.org/search.json";
-
+  const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
   const coverUrlFrom = (cover_i) =>
     cover_i
-      ? `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`
+      ? `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
       : "/placeholder-book.png";
 
   const showData = async (query = "") => {
-    const trimmed = query.trim();
-    if (trimmed.length < 2) {
-      setResults([]);
-      setSuggestions([]);
-      setMensaje("Ingresa al menos 2 caracteres para buscar.");
-      return;
-    }
-
     try {
-      const resp = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${encodeURIComponent(trimmed)}`);
-      if (!resp.ok) throw new Error("Backend no disponible");
+      const trimmed = query.trim();
+      if (trimmed.length < 2) {
+        setBooks([]);
+        setSuggestions([]);
+        setMensaje("Ingresa al menos 2 caracteres para buscar.");
+        return;
+      }
+
+      const resp = await fetch(
+        `${BASE_API_URL}${ENDPOINT}?title=${encodeURIComponent(trimmed)}`
+      );
+      if (resp.status === 304) {
+        console.log("Response 304: Not Modified — reusing previous results.");
+        return;
+      }
+      if (!resp.ok) {
+        throw new Error(`Error ${resp.status}: ${resp.statusText}`);
+      }
 
       const data = await resp.json();
       if (data.success && data.results.length > 0) {
-        setResults(
-          data.results.map((b) => ({
-            id: b.id || b.key || b.title,
-            title: b.title,
-            authors: b.authors || b.author || "Autor desconocido",
-            cover_i: b.cover_i || null,
-          }))
-        );
+        setBooks(data.results);
+        setSuggestions(data.results);
         setMensaje("");
-        return;
       } else {
-        throw new Error("Sin resultados en backend");
+        setBooks([]);
+        setSuggestions([]);
+        setMensaje(data.message || "No se encontraron resultados.");
       }
-    } catch {
-      try {
-        const fallbackResp = await fetch(`${FALLBACK_URL}?q=${encodeURIComponent(trimmed)}&limit=12`);
-        if (!fallbackResp.ok) throw new Error("Error con OpenLibrary");
-
-        const data = await fallbackResp.json();
-        if (data.docs && data.docs.length > 0) {
-          const normalized = data.docs.map((d, idx) => ({
-            id: d.key || `${d.title}-${idx}`,
-            title: d.title,
-            authors: d.author_name ? d.author_name.join(", ") : "Autor desconocido",
-            cover_i: d.cover_i || null,
-          }));
-          setResults(normalized);
-          setMensaje("");
-        } else {
-          setResults([]);
-          setMensaje("No se encontraron resultados.");
-        }
-      } catch (error) {
-        console.error("Error al obtener datos:", error);
-        setMensaje("Error al obtener datos. Revisa la consola.");
-      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setMensaje("Error al obtener datos. Revisa la consola.");
     }
   };
 
+  const debouncedSearch = useMemo(() => debounce(showData, 500), []);
   const searcher = (e) => {
     const value = e.target.value;
     setSearch(value);
-    if (value.trim() === "") {
-      setSuggestions([]);
-      setResults([]);
-      return;
-    }
-    showData(value);
+    debouncedSearch(value);
   };
 
   const pickSuggestion = (book) => {
     setSearch(book.title);
     setSuggestions([]);
-    showData(book.title);
+    setBooks([book]);
   };
 
-  useEffect(() => {
-    showData("tolstoy");
-  }, []);
+  const handleAddBook = (book) => {
+    onAddBook(book);
+    setMyBooks((prev) => [...prev, book]); 
+  };
+
+  const handleRemoveBook = (bookToRemove) => {
+    setMyBooks((prev) => prev.filter((b) => b.title !== bookToRemove.title));
+  };
+
+  useEffect(() => {}, []);
 
   return (
-    <div className="search-root container my-4">
-      <div className="input-group mb-3">
+    <div className="search-root">
+      <div className="search-bar-container">
         <input
           value={search}
           onChange={searcher}
           type="text"
           placeholder="Buscar título o autor..."
-          className="form-control"
+          className="search-input"
         />
       </div>
 
-      {suggestions.length > 0 && (
-        <ul className="list-group mb-2">
-          {suggestions.map((s) => (
-            <li
-              key={s.id}
-              onClick={() => pickSuggestion(s)}
-              className="list-group-item list-group-item-action"
-            >
-              <strong>{s.title}</strong> <span>por {s.authors}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {mensaje && <p className="mensaje">{mensaje}</p>}
 
-      {mensaje && <p className="text-center text-muted">{mensaje}</p>}
-
-      <div className="d-flex flex-wrap justify-content-center">
-        {results.map((b) => (
-          <BookCard
-            key={b.id}
-            book={{
-              title: b.title,
-              authors: b.authors,
-              cover_i: b.cover_i,
-              id: b.id,
-            }}
-            onAddBook={onAddBook}
-          />
+      <div className="books-list">
+        {books.map((b) => (
+          <div key={b.id || b.key || b.title} className="book-card">
+            <div className="book-cover">
+              <img
+                src={coverUrlFrom(b.cover_i)}
+                alt={b.title}
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder-book.png";
+                }}
+              />
+            </div>
+            <div className="book-body">
+              <h3 className="book-title">{b.title}</h3>
+              <p className="book-author">by {b.authors}</p>
+            </div>
+            <div className="book-actions">
+              <button
+                className="btn btn-primary btn-sm me-2"
+                onClick={() =>
+                  handleAddBook({
+                    id: b.id || b.key || Date.now(),
+                    title: b.title,
+                    author: b.authors || "Autor desconocido",
+                  })
+                }
+              >
+                ➕ Agregar
+              </button>
+            </div>
+          </div>
         ))}
       </div>
+
+      {myBooks.length > 0 && (
+        <div className="mt-5">
+          <BookList books={myBooks} onRemoveBook={handleRemoveBook} />
+        </div>
+      )}
     </div>
   );
 };
-
-export default SearchComponent;

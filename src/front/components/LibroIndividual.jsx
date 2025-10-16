@@ -9,7 +9,7 @@ export const LibroIndividual = () => {
 
   const fetchLibro = async () => {
     try {
-      const response = await fetch(`api/books/${id}`);
+      const response = await fetch(`/api/books/${id}`);
       const data = await response.json();
       setLibro(data);
 
@@ -41,14 +41,15 @@ export const LibroIndividual = () => {
 
   if (!libro) return <p>Cargando libro...</p>;
 
+  const coverUrl = libro.cover_i
+    ? `https://covers.openlibrary.org/b/id/${libro.cover_i}-L.jpg`
+    : "/placeholder-book.png";
+
   return (
     <div className="container row align-items-center" style={{ justifySelf: "center" }}>
-      <div
-        className="col-4 col-lg-5"
-        style={{ textAlign: "center" }}
-      >
+      <div className="col-4 col-lg-5" style={{ textAlign: "center" }}>
         <img
-          src={libro.image}
+          src={coverUrl}
           alt="portada de libro"
           className="img-fluid"
           style={{ borderRadius: "8px" }}
@@ -63,13 +64,8 @@ export const LibroIndividual = () => {
           color: "darkolivegreen",
         }}
       >
-        <h1 className="mb-3 fw-medium" style={{ marginBottom: "14px" }}>
-          {libro.title}
-        </h1>
-        <h6
-          className="mb-3 fw-medium"
-          style={{ fontSize: "xx-large", marginBottom: "14px" }}
-        >
+        <h1 className="mb-3 fw-medium">{libro.title}</h1>
+        <h6 className="mb-3 fw-medium" style={{ fontSize: "xx-large" }}>
           {libro.author}
         </h6>
 
@@ -108,10 +104,7 @@ export const LibroIndividual = () => {
           </p>
         </div>
 
-        <h4
-          className="display-4 blockquote"
-          style={{ textAlign: "justify" }}
-        >
+        <h4 className="display-4 blockquote" style={{ textAlign: "justify" }}>
           {libro.sinopsis || "Sin sinopsis disponible."}
         </h4>
       </div>
