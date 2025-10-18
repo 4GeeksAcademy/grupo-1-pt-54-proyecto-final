@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash.debounce";
 import BookList from "./BookList"; 
 
-export const SearchComponent = ({ onAddBook }) => {
+const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
   const [books, setBooks] = useState([]);
   const [mensaje, setMensaje] = useState("");
@@ -67,7 +67,7 @@ export const SearchComponent = ({ onAddBook }) => {
   };
 
   const handleAddBook = (book) => {
-    onAddBook(book);
+    // onAddBook(book);
     setMyBooks((prev) => [...prev, book]); 
   };
 
@@ -133,3 +133,5 @@ export const SearchComponent = ({ onAddBook }) => {
     </div>
   );
 };
+
+export default SearchComponent;

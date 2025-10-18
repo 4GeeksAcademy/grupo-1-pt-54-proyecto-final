@@ -20,8 +20,9 @@ typing-extensions = "*"
 wtforms = "==3.1.2"
 sqlalchemy = "*"
 eralchemy2="*"
-flask-bcrypt = "*"
 flask-jwt-extended = "*"
+flask-bcrypt = "*"
+flask-mail = "*"
 
 [requires]
 python_version = "3.13"
