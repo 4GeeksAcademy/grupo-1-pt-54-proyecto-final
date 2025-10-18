@@ -13,6 +13,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { Recuperacion } from "./pages/Recuperacion";
 import { LibroIndividual } from "./components/LibroIndividual";
 import { EliminarLibro } from "./components/EliminarLibro";
+import { Dashboard } from "./pages/Dashboard";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,7 +31,7 @@ export const router = createBrowserRouter(
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path="/search-component" element={<SearchComponent />} />
         <Route path="/libro-individual/:id" element={<LibroIndividual />} />
-        <Route path="/dashboard" element={<LibroIndividual />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/registro-usuario" element={<RegistroUsuario />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion" element={<Recuperacion />} />
