@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { RegistroUsuario } from "./pages/RegistroUsuario";
-import {SearchComponent} from "./components/SearchComponent";
+import SearchComponent from "./components/SearchComponent";
 import { Login } from "./pages/Login";
 import { LandingPage } from "./pages/LandingPage";
 import { Recuperacion } from "./pages/Recuperacion";

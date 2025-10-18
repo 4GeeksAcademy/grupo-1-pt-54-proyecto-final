@@ -7,25 +7,33 @@ export const EliminarLibro = ({ id, onDelete }) => {
 
     const deleteBook = async () => {
         try {
-            const response = await fetch(`api/books/${id}`, {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:3001/api/books/${id}`, {
                 method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
             if (response.ok) {
                 console.log("Book deleted successfully");
                 if (onDelete) onDelete(id);
             } else {
+                const errorData = await response.json();
                 console.error("Failed to delete book");
+                alert(errorData.message || "Failed to delete book");
             }
         } catch (error) {
             console.error("Error deleting book:", error);
+            alert("An error occurred while deleting the book. Please try again.");
         }
     };
 
     return (
         <>
             <button
-                className="btn"
+                className="btn btn-danger"
                 data-bs-toggle="modal"
                 data-bs-target={`#confirmation-${id}`}
             >
@@ -34,9 +42,9 @@ export const EliminarLibro = ({ id, onDelete }) => {
 
             <div
                 className="modal fade"
-                id={`#confirmation-${id}`}
+                id={`confirmation-${id}`}
                 tabIndex="-1"
-                aria-labelledby={`#confirmation-${id}`}
+                aria-labelledby={`confirmation-${id}`}
                 aria-hidden="true"
             >
                 <div className="modal-dialog">

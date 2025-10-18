@@ -86,6 +86,7 @@ const NuevaContrasena = ({ email }) => {
     const [nuevaContrasena, setNuevaContrasena] = useState('');
     const [confirmarContrasena, setConfirmarContrasena] = useState('');
     const [mensaje, setMensaje] = useState('');
+    const [carga, setCarga] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -98,6 +99,21 @@ const NuevaContrasena = ({ email }) => {
         if (!codigo.trim()) {
             setMensaje('Por favor ingresa el código de verificación');
             return;
+        }
+        try {
+            setCarga(true);
+            // llamada a API
+            setTimeout(() => {
+                setCarga(false);
+                setMensaje('¡Contraseña cambiada exitosamente!');
+                
+                setCodigo('');
+                setNuevaContrasena('');
+                setConfirmarContrasena('');
+            }, 2000);
+        } catch (error) {
+            setCarga(false);
+            setMensaje('Error al cambiar la contraseña. Inténtalo de nuevo.');
         }
 
         console.log('Cambiando contraseña para:', email);

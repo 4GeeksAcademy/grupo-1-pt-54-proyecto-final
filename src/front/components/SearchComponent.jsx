@@ -1,53 +1,51 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import debounce from "lodash.debounce";
+import BookList from "./BookList"; 
 
-export const SearchComponent = ({ onAddBook }) => {
+const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
   const [books, setBooks] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [myBooks, setMyBooks] = useState([]); 
 
-  const librosLocal = [
-    { id: 1, titulo: " ", autor: " " },
-  ];
-
-  const URL = "https://openlibrary.org/search.json";
+  const ENDPOINT = "/api/books/search";
+  const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
   const coverUrlFrom = (cover_i) =>
-    cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg` : "/placeholder-book.png";
+    cover_i
+      ? `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
+      : "/placeholder-book.png";
 
   const showData = async (query = "") => {
-
-
     try {
       const trimmed = query.trim();
       if (trimmed.length < 2) {
         setBooks([]);
+        setSuggestions([]);
         setMensaje("Ingresa al menos 2 caracteres para buscar.");
         return;
       }
 
       const resp = await fetch(
-        `${URL}?q=${encodeURIComponent(trimmed)}&limit=12`
+        `${BASE_API_URL}${ENDPOINT}?title=${encodeURIComponent(trimmed)}`
       );
-
+      if (resp.status === 304) {
+        console.log("Response 304: Not Modified — reusing previous results.");
+        return;
+      }
       if (!resp.ok) {
         throw new Error(`Error ${resp.status}: ${resp.statusText}`);
       }
 
       const data = await resp.json();
-
-      if (data.docs && data.docs.length > 0) {
-        const normalized = data.docs.map((d, idx) => ({
-          id: d.key || `${d.title}-${idx}`,
-          title: d.title,
-          authors: d.author_name ? d.author_name.join(", ") : "Autor desconocido",
-          cover_i: d.cover_i || null,
-        }));
-        setBooks(normalized);
+      if (data.success && data.results.length > 0) {
+        setBooks(data.results);
+        setSuggestions(data.results);
         setMensaje("");
       } else {
         setBooks([]);
-        setMensaje("No se encontraron resultados.");
+        setSuggestions([]);
+        setMensaje(data.message || "No se encontraron resultados.");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -55,31 +53,29 @@ export const SearchComponent = ({ onAddBook }) => {
     }
   };
 
+  const debouncedSearch = useMemo(() => debounce(showData, 500), []);
   const searcher = (e) => {
     const value = e.target.value;
     setSearch(value);
-
-    if (value.trim() === "") {
-      setSuggestions([]);
-    } else {
-      const filtered = librosLocal.filter((libro) =>
-        libro.titulo.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestions(filtered);
-    }
-
-    showData(value);
+    debouncedSearch(value);
   };
 
-  const pickSuggestion = (libro) => {
-    setSearch(libro.titulo);
+  const pickSuggestion = (book) => {
+    setSearch(book.title);
     setSuggestions([]);
-    showData(libro.titulo);
+    setBooks([book]);
   };
 
-  useEffect(() => {
-    showData("tolstoy");
-  }, []);
+  const handleAddBook = (book) => {
+    // onAddBook(book);
+    setMyBooks((prev) => [...prev, book]); 
+  };
+
+  const handleRemoveBook = (bookToRemove) => {
+    setMyBooks((prev) => prev.filter((b) => b.title !== bookToRemove.title));
+  };
+
+  useEffect(() => {}, []);
 
   return (
     <div className="search-root">
@@ -93,21 +89,11 @@ export const SearchComponent = ({ onAddBook }) => {
         />
       </div>
 
-      {suggestions.length > 0 && (
-        <ul className="suggestions-list">
-          {suggestions.map((s) => (
-            <li key={s.id} onClick={() => pickSuggestion(s)} className="suggestion-item">
-              <strong>{s.titulo}</strong> <span className="suggest-author">por {s.autor}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
       {mensaje && <p className="mensaje">{mensaje}</p>}
 
       <div className="books-list">
         {books.map((b) => (
-          <div key={b.id} className="book-card">
+          <div key={b.id || b.key || b.title} className="book-card">
             <div className="book-cover">
               <img
                 src={coverUrlFrom(b.cover_i)}
@@ -120,26 +106,32 @@ export const SearchComponent = ({ onAddBook }) => {
             <div className="book-body">
               <h3 className="book-title">{b.title}</h3>
               <p className="book-author">by {b.authors}</p>
-
             </div>
-            <div> 
+            <div className="book-actions">
               <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() =>
-                      onAddBook({
-                        title: book.title,
-                        author: book.author_name
-                          ? book.author_name[0]
-                          : "Autor desconocido",
-                      })
-                    }
-                  >
-                    ➕ Agregar
-                  </button>
+                className="btn btn-primary btn-sm me-2"
+                onClick={() =>
+                  handleAddBook({
+                    id: b.id || b.key || Date.now(),
+                    title: b.title,
+                    author: b.authors || "Autor desconocido",
+                  })
+                }
+              >
+                ➕ Agregar
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {myBooks.length > 0 && (
+        <div className="mt-5">
+          <BookList books={myBooks} onRemoveBook={handleRemoveBook} />
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default SearchComponent;
