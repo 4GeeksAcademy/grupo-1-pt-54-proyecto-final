@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export const Recuperacion = () => {
     const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ export const Recuperacion = () => {
     }
 
     return (
-        <div className="container">
+        <div className="container-fluid vh-100 p-0 m-0 overflow-hidden"> 
             {showNotification && (
                 <div className="alert alert-success alert-dismissible fade show mt-3" role="alert">
                     <strong>¡Éxito!</strong> Código enviado correctamente a tu correo electrónico.
@@ -38,17 +39,20 @@ export const Recuperacion = () => {
                 </div>
             )}
 
-            <div className="row justify-content-center">
-                <div className="col-md-5 p-0">
+            <div className="row g-0 h-100 m-0"> 
+                <div className="col-md-5 h-100 p-0 m-0"> 
                     <img 
                         src="https://i.pinimg.com/736x/2a/9a/ca/2a9acad6f2853ecd86c0f007ccfbf14b.jpg" 
                         alt="Imagen de recuperación"
-                        className="img-fluid rounded-start w-100 h-100" 
-                        style={{objectFit: "cover"}}
+                        className="w-100 h-100" 
+                        style={{
+                            objectFit: "cover",
+                            display: "block" 
+                        }}
                     />
                 </div>
-                <div className="col-md-6 d-flex align-items-center">
-                    <div className="card-body p4 w-100">
+                <div className="col-md-6 d-flex align-items-center p-4"> 
+                    <div className="card-body p-4 w-100"> 
                         <h2 className="card-title text-center mb-4">Recuperación de Contraseña</h2>
                         <form id="passwordRecoveryForm" onSubmit={handleSubmit}>
                             <div className="mb-3">
@@ -68,7 +72,7 @@ export const Recuperacion = () => {
                             </div>
                         </form>
                         <div className="text-center mt-3">
-                            <a href="#" className="text-decoration-none">Volver al Inicio de sesión</a>
+                            <Link to="/login" className="text-decoration-none">Volver al Inicio de sesión</Link> 
                         </div>
                     </div>
                 </div>
@@ -124,18 +128,21 @@ const NuevaContrasena = ({ email }) => {
     };
 
     return (
-        <div className="container">
-            <div className="row justify-content-center">
-                <div className="col-md-5 p-0">
+        <div className="container-fluid vh-100 p-0 m-0 overflow-hidden"> 
+            <div className="row g-0 h-100 m-0"> 
+                <div className="col-md-5 h-100 p-0 m-0"> 
                     <img 
                         src="https://i.pinimg.com/736x/2a/9a/ca/2a9acad6f2853ecd86c0f007ccfbf14b.jpg" 
                         alt="Imagen de recuperación"
-                        className="img-fluid rounded-start w-100 h-100" 
-                        style={{objectFit: "cover"}}
+                        className="w-100 h-100" 
+                        style={{
+                            objectFit: "cover",
+                            display: "block" 
+                        }}
                     />
                 </div>
-                <div className="col-md-6 d-flex align-items-center">
-                    <div className="card-body p4 w-100">
+                <div className="col-md-6 d-flex align-items-center p-4"> 
+                    <div className="card-body p-4 w-100"> 
                         <h2 className="card-title text-center mb-4">Nueva Contraseña</h2>
                         
                         {mensaje && (
@@ -203,7 +210,7 @@ const NuevaContrasena = ({ email }) => {
                         </form>
                         
                         <div className="text-center mt-3">
-                            <a href="#" className="text-decoration-none">Volver al Inicio de sesión</a>
+                            <Link to="/login" className="text-decoration-none">Volver al Inicio de sesión</Link>
                         </div>
                     </div>
                 </div>
