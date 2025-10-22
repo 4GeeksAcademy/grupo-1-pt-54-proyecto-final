@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Dashboard } from "../components/Dashboard";
 
 export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit  = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
@@ -85,11 +86,11 @@ export const Login = () => {
                         </div>
 
                         <div className="text-center">
-                            
-                                <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
-                                    Login
-                                </button>
-                           
+                            <Link to="/dashboard"><button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
+                                Login
+                            </button></Link>
+
+
                         </div>
                     </form>
                 </div>
