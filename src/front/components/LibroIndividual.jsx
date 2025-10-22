@@ -8,8 +8,10 @@ export const LibroIndividual = () => {
   const [estado, setEstado] = useState("No leído");
 
   const fetchLibro = async () => {
+    const ENDPOINT = "/api/books/search";
+    const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
     try {
-      const response = await fetch(`/api/books/${id}`);
+      const response = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${id}`);
       const data = await response.json();
       setLibro(data);
 

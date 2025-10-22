@@ -13,7 +13,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { Recuperacion } from "./pages/Recuperacion";
 import { LibroIndividual } from "./components/LibroIndividual";
 import { EliminarLibro } from "./components/EliminarLibro";
-import { Dashboard } from "./pages/Dashboard";
+import { Dashboard } from "./components/Dashboard"
 
 export const router = createBrowserRouter(
   createRoutesFromElements(

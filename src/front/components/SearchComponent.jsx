@@ -93,7 +93,7 @@ const SearchComponent = ({ onAddBook }) => {
 
       <div className="books-list">
         {books.map((b) => (
-          <div key={b.id || b.key || b.title} className="book-card">
+         <div key={b.id || b.key || b.title} className="book-card">
             <div className="book-cover">
               <img
                 src={coverUrlFrom(b.cover_i)}
@@ -125,11 +125,11 @@ const SearchComponent = ({ onAddBook }) => {
         ))}
       </div>
 
-      {myBooks.length > 0 && (
+      {/* {myBooks.length > 0 && (
         <div className="mt-5">
           <BookList books={myBooks} onRemoveBook={handleRemoveBook} />
         </div>
-      )}
+      )} */}
     </div>
   );
 };
