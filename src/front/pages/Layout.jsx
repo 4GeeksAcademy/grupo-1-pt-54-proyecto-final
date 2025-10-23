@@ -13,7 +13,8 @@ export const Layout = () => {
     const isLandingPage = location.pathname == "/" ? true : false
     const isLibroIndividual = location.pathname == "/libro-individual/1" ? true : false
     const isRecuperacion = location.pathname == "/recuperacion" ? true : false
-    const isDashboard = location.pathname == "/try-dashboard" ? true : false
+    const isDashboard = location.pathname == "/dashboard" ? true : false
+
 
     /*use condicional to not show navbar y footer in other  ==*/
     return (
