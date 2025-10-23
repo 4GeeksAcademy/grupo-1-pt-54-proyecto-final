@@ -6,6 +6,6 @@ npm install
 npm run build
 pip install pipenv
 
-pipenv install --deploy
+pipenv install --deploy --ignore-pipfile
 
 pipenv run upgrade
