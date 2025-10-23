@@ -26,7 +26,7 @@ export const router = createBrowserRouter(
     // Root Route: All navigation will start from here.
     <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
-      <Route index element={<LandingPage />} />
+      <Route path="/" element={<LandingPage />} />
 
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path="/search-component" element={<SearchComponent />} />
