@@ -1,11 +1,10 @@
 export const Footer = () => (
-	<footer className="footer mt-auto py-3 text-center">
-		<p>
-			Check the <a target="_blank" href="https://4geeks.com/docs/start/react-flask-template">template documentation</a> <i className="fa-solid fa-file"></i> for help.
-		</p>
-		<p>
-			Made with <i className="fa fa-heart text-danger" /> by{" "}
-			<a href="http://www.4geeksacademy.com">4Geeks Academy</a>
-		</p>
-	</footer>
+	<div className="container-fluid" style={{ padding: "0 50px 0 50px" }}>
+		<footer className="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
+			<i className="fa-solid fa-book-open" />
+			<span className="mb-3 mb-md-0 text-body-secondary">© 2025, Reading List</span>
+			<i className="fa-solid fa-glasses" />
+		</footer>
+	</div>
+
 );
