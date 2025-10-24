@@ -27,7 +27,8 @@ export const router = createBrowserRouter(
     <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
       <Route index element={<LandingPage />} />
-
+        {/* pruebaaaaaa */}
+        
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path="/search-component" element={<SearchComponent />} />
         <Route path="/libro-individual/:id" element={<LibroIndividual />} />

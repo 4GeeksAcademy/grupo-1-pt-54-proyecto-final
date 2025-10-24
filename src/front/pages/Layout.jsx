@@ -15,6 +15,7 @@ export const Layout = () => {
     const isRecuperacion = location.pathname == "/recuperacion" ? true : false
     const isDashboard = location.pathname == "/dashboard" ? true : false
 
+
     /*use condicional to not show navbar y footer in other  ==*/
     return (
         <ScrollToTop>
