@@ -8,14 +8,15 @@ export const RegistroUsuario = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const [showNotification, setShowNotification] = useState(false);
 
-    const handleSubmit  = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ first_name:firstName, last_name:lastName, email, password })
+                body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password })
             });
             const data = await response.json();
 
@@ -29,12 +30,44 @@ export const RegistroUsuario = () => {
             console.error("Error en registro:", error);
             alert("Hubo un error en la conexión con el servidor.");
         }
+
+
+        const handleSubmit = (e) => {
+            e.preventDefault();
+
+            console.log('Enviando código a:', email);
+
+            setShowNotification(true);
+
+            setTimeout(() => {
+                setShowNotification(false);
+                setRedirectToNewPassword(true);
+            }, 3000);
+
+            setEmail('');
+        };
+
+
     };
+
+
     return (
         <div
             className="container-fluid px-0 min-vh-100"
             style={{ backgroundColor: "antiquewhite" }}
         >
+            {showNotification && (
+                <div className="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <strong>¡Exito!</strong> Código enviado correctamente a tu correo electrónico.
+                    <strong> Redirigiendo al login</strong>
+                    <button
+                        type="button"
+                        className="btn-close"
+                        onClick={() => setShowNotification(false)}
+                    ></button>
+                </div>
+            )}
+
             <div className="row g-0 align-items-stretch">
                 <div className="col-12 col-lg-5">
                     <img
@@ -119,11 +152,11 @@ export const RegistroUsuario = () => {
                         </div>
 
                         <div className="text-center">
-                           
-                                <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
-                                    Sign Up
-                                </button>
-                            
+
+                            <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
+                                Sign Up
+                            </button>
+
                         </div>
                     </form>
                 </div>
