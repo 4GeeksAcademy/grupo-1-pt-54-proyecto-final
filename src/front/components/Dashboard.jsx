@@ -11,7 +11,7 @@ export const Dashboard = () => {
         { id: 5, title: "Ejemplo de libro", author: "Autor Ejemplo" }
     ]);
     return (
-        <div style={{ backgroundColor: '#F8F9FA', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', margin: 0, padding: 0, minHeight: '100vh' }}>
+        <div style={{ backgroundColor: '#F8F9FA', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', margin: 0, padding: 0, minHeight: '82vh' }}>
             <div style={{ backgroundColor: '#2C3E50', color: 'white', position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
                     <div style={{ fontSize: '1.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
@@ -23,7 +23,7 @@ export const Dashboard = () => {
                     <SearchComponent />
                 </div>
             </div>
-            <div style={{ marginTop: '80px', padding: '20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <div style={{ marginTop: '48px', padding: '20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px' }}>
                     {books.map(book => (
                         <div key={book.id} className="book-card">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 export const RegistroUsuario = () => {
     const [firstName, setFirstname] = useState("");
@@ -21,14 +22,16 @@ export const RegistroUsuario = () => {
             const data = await response.json();
 
             if (data.success) {
-                alert("Registro exitoso");
-                navigate("/login");
+                toast.success('Registro éxitoso! Por favor, verifica tu email.')
+                setTimeout(() => {
+                    navigate("/");
+                }, 2000);
             } else {
                 alert(data.message);
             }
         } catch (error) {
             console.error("Error en registro:", error);
-            alert("Hubo un error en la conexión con el servidor.");
+            toast.error("Hubo un error en la conexión con el servidor.")
         }
 
 
@@ -55,18 +58,10 @@ export const RegistroUsuario = () => {
         <div
             className="container-fluid px-0 min-vh-100"
             style={{ backgroundColor: "antiquewhite" }}
-        >
-            {showNotification && (
-                <div className="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                    <strong>¡Exito!</strong> Código enviado correctamente a tu correo electrónico.
-                    <strong> Redirigiendo al login</strong>
-                    <button
-                        type="button"
-                        className="btn-close"
-                        onClick={() => setShowNotification(false)}
-                    ></button>
-                </div>
-            )}
+        > <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
 
             <div className="row g-0 align-items-stretch">
                 <div className="col-12 col-lg-5">
@@ -76,7 +71,9 @@ export const RegistroUsuario = () => {
                         className="img-fluid w-100"
                         style={{
                             objectFit: "cover",
-                            height: "633px"
+                            height: "633px",
+                            WebkitMaskImage: "linear-gradient(to right, black 67%, transparent 95%)",
+                            maskImage: "linear-gradient(to right, black 80%, transparent 100%)"
                         }}
                     />
                 </div>
