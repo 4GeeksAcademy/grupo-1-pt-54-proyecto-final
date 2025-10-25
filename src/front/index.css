@@ -1,14 +1,15 @@
-.bg-curso{
-    background-color: #8540F5;
+.bg-curso {
+  background-color: #8540f5;
 }
 .search-root {
   max-width: 960px;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
   color: #222;
   z-index: 9999;
   position: absolute;
   left: 52%;
-  top: 8px;
+  top: 5px;
 }
 .search-bar-container {
   position: sticky;
@@ -21,8 +22,8 @@
   width: 100%;
   padding: 14px 18px;
   border-radius: 10px;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
   font-size: 16px;
   height: 32px;
 }
@@ -32,7 +33,7 @@
   list-style: none;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #EEF2F7;
+  border: 1px solid #eef2f7;
 }
 .suggestion-item {
   padding: 10px 12px;
@@ -42,15 +43,15 @@
   align-items: center;
 }
 .suggestion-item:hover {
-  background: #F6FBFF;
+  background: #f6fbff;
 }
 .suggest-author {
-  color: #5B6B75;
+  color: #5b6b75;
   margin-left: 6px;
   font-size: 13px;
 }
 .mensaje {
-  color: #9AA3A8;
+  color: #9aa3a8;
   margin: 10px 0 16px 0;
 }
 .books-list {
@@ -65,11 +66,11 @@
   gap: 18px;
   padding: 16px;
   border-radius: 10px;
-  border: 1px solid #E6EEF3;
+  border: 1px solid #e6eef3;
   background: white;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
   position: relative;
-  height: 80px;
+  height: auto;
 }
 .book-cover img {
   width: 60px;
@@ -91,7 +92,7 @@
 }
 .book-author {
   margin: 0 0 10px 0;
-  color: #55606B;
+  color: #55606b;
   width: 220px;
   height: 25px;
   font-size: medium;
@@ -99,7 +100,7 @@
 }
 .book-added {
   margin: 0;
-  color: #9AA3A8;
+  color: #9aa3a8;
   font-size: 13px;
 }
 .book-badge {
@@ -112,19 +113,19 @@
   text-align: center;
 }
 .badge-high {
-  background: #E6F7F2;
-  color: #0F766E;
-  border-color: #C8F0E8;
+  background: #e6f7f2;
+  color: #0f766e;
+  border-color: #c8f0e8;
 }
 .badge-medium {
-  background: #F0FBFF;
-  color: #05668D;
-  border-color: #D8F3FB;
+  background: #f0fbff;
+  color: #05668d;
+  border-color: #d8f3fb;
 }
 .badge-low {
-  background: #FFF9F0;
-  color: #A35B00;
-  border-color: #FFE9B8;
+  background: #fff9f0;
+  color: #a35b00;
+  border-color: #ffe9b8;
 }
 @media (max-width: 640px) {
   .book-card {

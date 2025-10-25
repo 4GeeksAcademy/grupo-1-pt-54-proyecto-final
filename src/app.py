@@ -15,6 +15,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
 from flask_mail import Mail, Message
 import datetime
+from sqlalchemy import select
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -24,7 +25,16 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 CORS(app)
 jwt = JWTManager(app)
+
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
+app.config["MAIL_PORT"] = os.getenv("MAIL_PORT")
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+
 mail = Mail(app)
+
 app.url_map.strict_slashes = False
 
 # database condiguration
@@ -122,16 +132,36 @@ def handle_register():
         expires = datetime.timedelta(hours=12)
 
         token = create_access_token(identity=email, expires_delta=expires)
-        verify_link = f"{os.getenv("VITE_FRONTEND_URL")}/verify/{token}"
+        verify_link = f"{os.getenv("VITE_FRONTEND_URL")}verify?token={token}"
 
         msg = Message("Verificación de cuenta", recipients=[email])
-        msg.body = f"Hola {first_name}, por favor verifica tu cuenta haciendo clic en el siguiente enlace: {verify_link}"
+        msg.body = f"Hola {first_name} de parte de Reading List! \n\nEsperemos que se encuentre bien! Por favor verifica tu cuenta haciendo clic en el siguiente enlace: \n\n {verify_link}"
         mail.send(msg)
-        
+
         if new_user:
             return jsonify({"success": True, "message": "Usuario creado exitosamente", "user": new_user.serialize()}), 201
         else:
             return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
+
+
+@app.route('/api/verify/<token>', methods=['GET'])
+def verify_token(token):
+
+    try:
+        data = decode_token(token)
+        user = db.session.execute(db.select(User).filter_by(
+            email=data["sub"])).scalar_one_or_none()
+
+        if user:
+            user.is_verified = True
+            user.is_active = True
+            db.session.commit()
+            return jsonify({"msg": "Usuario verificado exitosamente"}), 200
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({"msg": "Token inválido"}), 400
 
 
 @app.route('/api/reset-password/<token>', methods=['POST'])
