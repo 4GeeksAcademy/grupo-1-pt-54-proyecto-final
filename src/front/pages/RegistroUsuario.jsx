@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 export const RegistroUsuario = () => {
     const [firstName, setFirstname] = useState("");
@@ -8,33 +9,60 @@ export const RegistroUsuario = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const [showNotification, setShowNotification] = useState(false);
 
-    const handleSubmit  = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ first_name:firstName, last_name:lastName, email, password })
+                body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password })
             });
             const data = await response.json();
 
             if (data.success) {
-                alert("Registro exitoso");
-                navigate("/login");
+                toast.success('Registro éxitoso! Por favor, verifica tu email.')
+                setTimeout(() => {
+                    navigate("/");
+                }, 2000);
             } else {
                 alert(data.message);
             }
         } catch (error) {
             console.error("Error en registro:", error);
-            alert("Hubo un error en la conexión con el servidor.");
+            toast.error("Hubo un error en la conexión con el servidor.")
         }
+
+
+        const handleSubmit = (e) => {
+            e.preventDefault();
+
+            console.log('Enviando código a:', email);
+
+            setShowNotification(true);
+
+            setTimeout(() => {
+                setShowNotification(false);
+                setRedirectToNewPassword(true);
+            }, 3000);
+
+            setEmail('');
+        };
+
+
     };
+
+
     return (
         <div
             className="container-fluid px-0 min-vh-100"
             style={{ backgroundColor: "antiquewhite" }}
-        >
+        > <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
+
             <div className="row g-0 align-items-stretch">
                 <div className="col-12 col-lg-5">
                     <img
@@ -43,7 +71,9 @@ export const RegistroUsuario = () => {
                         className="img-fluid w-100"
                         style={{
                             objectFit: "cover",
-                            height: "633px"
+                            height: "633px",
+                            WebkitMaskImage: "linear-gradient(to right, black 67%, transparent 95%)",
+                            maskImage: "linear-gradient(to right, black 80%, transparent 100%)"
                         }}
                     />
                 </div>
@@ -119,11 +149,11 @@ export const RegistroUsuario = () => {
                         </div>
 
                         <div className="text-center">
-                           
-                                <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
-                                    Sign Up
-                                </button>
-                            
+
+                            <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
+                                Sign Up
+                            </button>
+
                         </div>
                     </form>
                 </div>

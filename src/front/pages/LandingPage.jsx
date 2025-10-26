@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export const LandingPage = () => {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden" }}>
+    <div style={{ position: "relative", width: "100%", height: "90vh", overflow: "hidden" }}>
       <img
         src="https://onlineketab.com/wp-content/uploads/2024/02/BANNERA5-1.jpg"
         alt="background image"
