@@ -8,6 +8,7 @@ export const LibroIndividual = () => {
   const [estado, setEstado] = useState("No leído");
 
   const fetchLibro = async () => {
+
     const ENDPOINT = `/api/books/${id}`;
     const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
     try {
@@ -19,7 +20,6 @@ export const LibroIndividual = () => {
       if (!contentType || !contentType.includes("application/json")) {
         throw new Error("Respuesta no es JSON");
       }
-
       const data = await response.json();
       setLibro(data);
 

@@ -14,6 +14,8 @@ import { Recuperacion } from "./pages/Recuperacion";
 import { LibroIndividual } from "./components/LibroIndividual";
 import { EliminarLibro } from "./components/EliminarLibro";
 import { BookStatus } from "./components/BookStatus";
+import { Dashboard } from "./components/Dashboard"
+import { Verify } from "./pages/Verify";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,15 +29,15 @@ export const router = createBrowserRouter(
     <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
       <Route index element={<LandingPage />} />
-
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path="/search-component" element={<SearchComponent />} />
         <Route path="/libro-individual/:id" element={<LibroIndividual />} />
-        <Route path="/dashboard" element={<LibroIndividual />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/registro-usuario" element={<RegistroUsuario />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion" element={<Recuperacion />} />
         <Route path="/eliminar-libro" element={<EliminarLibro />} />
         <Route path="/book-status" element={<BookStatus />} />
+      <Route path="/verify" element={<Verify />} />
     </Route>
   ))

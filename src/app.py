@@ -13,6 +13,9 @@ from api.commands import setup_commands
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
+from flask_mail import Mail, Message
+import datetime
+from sqlalchemy import select
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -22,6 +25,16 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 CORS(app)
 jwt = JWTManager(app)
+
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
+app.config["MAIL_PORT"] = os.getenv("MAIL_PORT")
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+
+mail = Mail(app)
+
 app.url_map.strict_slashes = False
 
 # database condiguration
@@ -115,10 +128,40 @@ def handle_register():
         data['password'] = hashed_password
         data['is_active'] = is_active
         new_user = User.create_user(data)
+
+        expires = datetime.timedelta(hours=12)
+
+        token = create_access_token(identity=email, expires_delta=expires)
+        verify_link = f"{os.getenv("VITE_FRONTEND_URL")}verify?token={token}"
+
+        msg = Message("Verificación de cuenta", recipients=[email])
+        msg.body = f"Hola {first_name} de parte de Read & Read! \n\nEsperemos que se encuentre bien! Por favor verifica tu cuenta haciendo clic en el siguiente enlace: \n\n {verify_link}"
+        mail.send(msg)
+
         if new_user:
             return jsonify({"success": True, "message": "Usuario creado exitosamente", "user": new_user.serialize()}), 201
         else:
             return jsonify({"success": False, "message": "Error al crear el usuario"}), 500
+
+
+@app.route('/api/verify/<token>', methods=['GET'])
+def verify_token(token):
+
+    try:
+        data = decode_token(token)
+        user = db.session.execute(db.select(User).filter_by(
+            email=data["sub"])).scalar_one_or_none()
+
+        if user:
+            user.is_verified = True
+            user.is_active = True
+            db.session.commit()
+            return jsonify({"msg": "Usuario verificado exitosamente"}), 200
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({"msg": "Token inválido"}), 400
 
 
 @app.route('/api/reset-password/<token>', methods=['POST'])
@@ -150,7 +193,29 @@ def handle_reset_password(token):
         print(error)
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
+
+# forgot_password
+@app.route('/api/forgot', methods=['POST'])
+def forgot_password():
+    try:
+        data = request.get_json(silent=True)
+        email = data.get("email", None)
+        user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
+
+        token = create_access_token(identifier=email, expires_delta=False)
+        reset_link = f"{os.getenv('VITE_FRONTEND_URL')}/reset?token={token}"
+
+        msg = Message("Recuperar contraseña", recipients=[email])
+        msg.body = f"Hola, para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_link}"
+        mail.send(msg)
+
+        return jsonify({"msg": "Correo de recuperación enviado"}), 200
     
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({"msg": "Error al enviar el correo"}), 400
+
 @app.route('/api/books/<int:book_id>', methods=['PUT'])
 @jwt_required()
 def update_book_state(book_id):
@@ -164,7 +229,8 @@ def update_book_state(book_id):
         return jsonify({"success": False, "message": "Estado no válido"}), 400
 
     from api.models import Book
-    book = db.session.execute(db.select(Book).filter_by(id=book_id)).scalar_one_or_none()
+    book = db.session.execute(db.select(Book).filter_by(
+        id=book_id)).scalar_one_or_none()
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
 
@@ -194,7 +260,8 @@ def delete_book(book_id):
     user_id = int(get_jwt_identity())
 
     from api.models import Book
-    book = db.session.execute(db.select(Book).filter_by(id=book_id)).scalar_one_or_none()
+    book = db.session.execute(db.select(Book).filter_by(
+        id=book_id)).scalar_one_or_none()
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
 
@@ -211,7 +278,8 @@ def delete_book(book_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
-    
+
+
 # this only runs if ⁠ $ python src/main.py ⁠ is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))

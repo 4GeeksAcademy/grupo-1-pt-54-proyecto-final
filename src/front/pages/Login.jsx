@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit  = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
@@ -19,14 +20,16 @@ export const Login = () => {
 
             if (data.success) {
                 sessionStorage.setItem("token", data.access_token);
-                alert("Login exitoso");
-                navigate("/");
+                toast.success('Login exitoso!')
+                setTimeout(() => {
+                    navigate("/dashboard");
+                }, 2000);
             } else {
                 alert(data.message);
             }
         } catch (error) {
             console.error("Error en login:", error);
-            alert("Hubo un error en la conexión con el servidor.");
+            toast.error("Hubo un error en la conexión con el servidor.");
         }
     };
 
@@ -34,7 +37,10 @@ export const Login = () => {
         <div
             className="container-fluid px-0 min-vh-100"
             style={{ backgroundColor: "lavender" }}
-        >
+        > <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
             <div className="row g-0 align-items-stretch">
                 <div className="col-12 col-lg-5">
                     <img
@@ -43,7 +49,9 @@ export const Login = () => {
                         className="img-fluid w-100"
                         style={{
                             objectFit: "cover",
-                            height: "633px"
+                            height: "633px",
+                            WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                            maskImage: "linear-gradient(to right, black 80%, transparent 100%)"
                         }}
                     />
                 </div>
@@ -84,12 +92,11 @@ export const Login = () => {
                             />
                         </div>
 
-                        <div className="text-center">
-                            
-                                <button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
-                                    Login
-                                </button>
-                           
+                        <div className="text-center"><button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
+                            Login
+                        </button>
+
+
                         </div>
                     </form>
                 </div>

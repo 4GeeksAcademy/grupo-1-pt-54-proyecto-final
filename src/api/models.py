@@ -19,7 +19,7 @@ class User(db.Model):
         String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(
-        Boolean(), nullable=False, default=True)
+        Boolean(), nullable=False, default=False)
     is_verified: Mapped[bool] = mapped_column(
         Boolean(), nullable=False, default=False)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -27,7 +27,7 @@ class User(db.Model):
     created_at: Mapped[DateTime] = mapped_column(
         DateTime, default=datetime.now(UTC))
     updated_at: Mapped[DateTime] = mapped_column(
-        DateTime, onupdate=datetime.now(UTC),default=datetime.now(UTC))
+        DateTime, onupdate=datetime.now(UTC), default=datetime.now(UTC))
 
     reading_lists: Mapped["ReadingList"] = relationship(
         back_populates="user", cascade="all, delete-orphan")
@@ -41,10 +41,10 @@ class User(db.Model):
             "last_name": self.last_name,
             "is_active": self.is_active
         }
-    
+
     @classmethod
     def create_user(cls, data):
-        try: 
+        try:
             new_user = cls(**data)
             db.session.add(new_user)
             db.session.commit()
