@@ -135,7 +135,7 @@ def handle_register():
         verify_link = f"{os.getenv("VITE_FRONTEND_URL")}verify?token={token}"
 
         msg = Message("Verificación de cuenta", recipients=[email])
-        msg.body = f"Hola {first_name} de parte de Reading List! \n\nEsperemos que se encuentre bien! Por favor verifica tu cuenta haciendo clic en el siguiente enlace: \n\n {verify_link}"
+        msg.body = f"Hola {first_name} de parte de Read & Read! \n\nEsperemos que se encuentre bien! Por favor verifica tu cuenta haciendo clic en el siguiente enlace: \n\n {verify_link}"
         mail.send(msg)
 
         if new_user:
