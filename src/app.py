@@ -163,6 +163,32 @@ def verify_token(token):
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
 
+# forgot_password
+
+
+@app.route('/api/forgot', methods=['POST'])
+def forgot_password():
+    try:
+        data = request.get_json(silent=True)
+        email = data.get("email", None)
+        user = db.session.execute(db.select(User).filter_by(
+            email=email)).scalar_one_or_none()
+
+        expires = datetime.timedelta(hours=12)
+        token = create_access_token(identity=email, expires_delta=expires)
+        reset_link = f"{os.getenv('VITE_FRONTEND_URL')}reset?token={token}"
+
+        msg = Message("Recuperar contraseña", recipients=[email])
+        msg.body = f"Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace por favor: \n\n {reset_link}"
+        mail.send(msg)
+
+        return jsonify({"msg": "Correo de recuperación enviado"}), 200
+
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({"msg": "Token inválido"}), 400
+
 
 @app.route('/api/reset-password/<token>', methods=['POST'])
 def handle_reset_password(token):
@@ -170,10 +196,7 @@ def handle_reset_password(token):
     try:
         decoded_data = decode_token(token)
         data = request.get_json(silent=True)
-        new_password = data.get("password", None)
-        print(new_password)
         email = decoded_data.get("sub")
-
         user = db.session.execute(
             db.select(User).filter_by(email=email)
         ).scalar_one_or_none()
@@ -181,10 +204,10 @@ def handle_reset_password(token):
         if not user:
             return jsonify({"msg": "Usuario no encontrado"}), 404
 
+        new_password = data.get("password", None)
         password_hash = bcrypt.generate_password_hash(
             new_password).decode('utf-8')
         user.password = password_hash
-
         db.session.commit()
 
         return jsonify({"msg": "Contraseña actualizada"}), 200
@@ -194,27 +217,6 @@ def handle_reset_password(token):
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
 
-# forgot_password
-@app.route('/api/forgot', methods=['POST'])
-def forgot_password():
-    try:
-        data = request.get_json(silent=True)
-        email = data.get("email", None)
-        user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
-
-        token = create_access_token(identifier=email, expires_delta=False)
-        reset_link = f"{os.getenv('VITE_FRONTEND_URL')}/reset?token={token}"
-
-        msg = Message("Recuperar contraseña", recipients=[email])
-        msg.body = f"Hola, para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_link}"
-        mail.send(msg)
-
-        return jsonify({"msg": "Correo de recuperación enviado"}), 200
-    
-    except Exception as error:
-        print(error)
-        db.session.rollback()
-        return jsonify({"msg": "Error al enviar el correo"}), 400
 
 @app.route('/api/books/<int:book_id>', methods=['PUT'])
 @jwt_required()

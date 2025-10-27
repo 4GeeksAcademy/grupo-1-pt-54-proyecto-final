@@ -15,6 +15,7 @@ import { LibroIndividual } from "./components/LibroIndividual";
 import { EliminarLibro } from "./components/EliminarLibro";
 import { Dashboard } from "./components/Dashboard"
 import { Verify } from "./pages/Verify";
+import { NuevaContrasena } from "./pages/Recuperacion";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,6 +38,7 @@ export const router = createBrowserRouter(
       <Route path="/registro-usuario" element={<RegistroUsuario />} />
       <Route path="/login" element={<Login />} />
       <Route path="/recuperacion" element={<Recuperacion />} />
+      <Route path="/reset" element={<NuevaContrasena />} />
       <Route path="/eliminar-libro" element={<EliminarLibro />} />
       <Route path="/verify" element={<Verify />} />
     </Route>
