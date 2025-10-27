@@ -13,6 +13,10 @@ from api.commands import setup_commands
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
+import urllib.request
+import urllib.parse
+import json
+import os
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -152,12 +156,15 @@ def handle_reset_password(token):
         return jsonify({"msg": "Token inválido"}), 400
 
 # forgot_password
+
+
 @app.route('/api/forgot', methods=['POST'])
 def forgot_password():
     try:
         data = request.get_json(silent=True)
         email = data.get("email", None)
-        user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
+        user = db.session.execute(db.select(User).filter_by(
+            email=email)).scalar_one_or_none()
 
         token = create_access_token(identifier=email, expires_delta=False)
         reset_link = f"{os.getenv('VITE_FRONTEND_URL')}/reset?token={token}"
@@ -167,11 +174,12 @@ def forgot_password():
         mail.send(msg)
 
         return jsonify({"msg": "Correo de recuperación enviado"}), 200
-    
+
     except Exception as error:
         print(error)
         db.session.rollback()
         return jsonify({"msg": "Error al enviar el correo"}), 400
+
 
 @app.route('/api/books/<int:book_id>', methods=['PUT'])
 @jwt_required()
@@ -186,7 +194,8 @@ def update_book_state(book_id):
         return jsonify({"success": False, "message": "Estado no válido"}), 400
 
     from api.models import Book
-    book = db.session.execute(db.select(Book).filter_by(id=book_id)).scalar_one_or_none()
+    book = db.session.execute(db.select(Book).filter_by(
+        id=book_id)).scalar_one_or_none()
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
 
@@ -216,7 +225,8 @@ def delete_book(book_id):
     user_id = int(get_jwt_identity())
 
     from api.models import Book
-    book = db.session.execute(db.select(Book).filter_by(id=book_id)).scalar_one_or_none()
+    book = db.session.execute(db.select(Book).filter_by(
+        id=book_id)).scalar_one_or_none()
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
 
@@ -233,7 +243,56 @@ def delete_book(book_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
-    
+
+
+BOOKS_FILE = "books.json"
+
+
+def load_books():
+    if not os.path.exists(BOOKS_FILE):
+        with open(BOOKS_FILE, "w") as f:
+            json.dump([], f)
+    with open(BOOKS_FILE, "r") as f:
+        return json.load(f)
+
+
+def save_books(books):
+    with open(BOOKS_FILE, "w") as f:
+        json.dump(books, f, indent=2)
+
+
+@app.route("/api/books", methods=["GET"])
+def get_books():
+    """Return saved books."""
+    return jsonify(load_books()), 200
+
+
+@app.route("/api/books", methods=["POST"])
+def add_book():
+    """Add a book to local storage."""
+    new_book = request.get_json()
+    if not new_book or "title" not in new_book:
+        return jsonify({"success": False, "message": "Datos inválidos"}), 400
+    books = load_books()
+ 
+    if any(b["title"].lower() == new_book["title"].lower() for b in books):
+        return jsonify({"success": False, "message": "El libro ya existe"}), 400
+    new_book["id"] = new_book.get("id") or str(len(books) + 1)
+    books.append(new_book)
+    save_books(books)
+    return jsonify({"success": True, "message": "Libro agregado", "book": new_book}), 201
+
+
+@app.route("/api/books/<id>", methods=["GET"])
+def get_single_book(id):
+    """Return a specific saved book."""
+    books = load_books()
+    book = next((b for b in books if str(b["id"]) == id), None)
+    if not book:
+        return jsonify({"success": False, "message": "Libro no encontrado"}), 404
+    return jsonify(book), 200 
+
+
 # this only runs if ⁠ $ python src/main.py ⁠ is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
