@@ -34,23 +34,6 @@ export const RegistroUsuario = () => {
             toast.error("Hubo un error en la conexión con el servidor.")
         }
 
-
-        const handleSubmit = (e) => {
-            e.preventDefault();
-
-            console.log('Enviando código a:', email);
-
-            setShowNotification(true);
-
-            setTimeout(() => {
-                setShowNotification(false);
-                setRedirectToNewPassword(true);
-            }, 3000);
-
-            setEmail('');
-        };
-
-
     };
 
 
