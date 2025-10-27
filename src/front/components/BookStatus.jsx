@@ -19,7 +19,7 @@ export const BookStatus = () => {
   };
 
   return (
-    <div className="relative" style={{ marginLeft: "50px" }}>
+    <div className="relative" style={{ marginBottom: "15px" }}>
       <select
         value={bookState}
         onChange={handleChangeState}
