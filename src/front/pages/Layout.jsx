@@ -22,7 +22,7 @@ export const Layout = () => {
         <ScrollToTop>
             {isRegisterPath || isLoginPath || isLandingPage || isRecuperacion || isDashboard || isReset ? "" : isLibroIndividual ? <NavbarLibroIndividual /> : <Navbar />}
             <Outlet />
-            {isRegisterPath || isLoginPath ? "" : <Footer />}
+            {isRegisterPath || isLoginPath || isReset || isRecuperacion  ? "" : <Footer />}
         </ScrollToTop>
     )
 }
