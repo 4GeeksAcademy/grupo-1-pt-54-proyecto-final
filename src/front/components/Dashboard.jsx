@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EliminarLibro } from "./EliminarLibro"
 import SearchComponent from "./SearchComponent"
 import { Link } from 'react-router-dom';
 export const Dashboard = () => {
-    const [books, setBooks] = useState([
-        { id: 1, title: "Ejemplo de libro", author: "Autor Ejemplo" },
-        { id: 2, title: "Ejemplo de libro", author: "Autor Ejemplo" },
-        { id: 3, title: "Ejemplo de libro", author: "Autor Ejemplo" },
-        { id: 4, title: "Ejemplo de libro", author: "Autor Ejemplo" },
-        { id: 5, title: "Ejemplo de libro", author: "Autor Ejemplo" }
-    ]);
+    const [books, setBooks] = useState([]);
+    const fetchBooks = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books`);
+            const data = await res.json();
+            setBooks(data);
+        } catch (err) {
+            console.error("Error fetching books:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchBooks();
+    }, []);
     return (
         <div style={{ backgroundColor: '#F8F9FA', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', margin: 0, padding: 0, minHeight: '82vh' }}>
             <div style={{ backgroundColor: '#2C3E50', color: 'white', position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>

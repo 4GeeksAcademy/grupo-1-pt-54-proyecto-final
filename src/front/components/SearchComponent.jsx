@@ -11,11 +11,8 @@ const SearchComponent = ({ onAddBook }) => {
 
   const ENDPOINT = "/api/books/search";
   const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
-  const coverUrlFrom = (cover_i) =>
-    cover_i
-      ? `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
-      : "/placeholder-book.png";
-
+  const coverUrlFrom = (cover_i) => `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
+     
   const showData = async (query = "") => {
     try {
       const trimmed = query.trim();
@@ -98,9 +95,6 @@ const SearchComponent = ({ onAddBook }) => {
               <img
                 src={coverUrlFrom(b.cover_i)}
                 alt={b.title}
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder-book.png";
-                }}
               />
             </div>
             <div className="book-body">
