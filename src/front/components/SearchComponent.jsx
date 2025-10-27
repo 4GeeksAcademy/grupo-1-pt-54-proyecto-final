@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash.debounce";
-import BookList from "./BookList"; 
+import BookList from "./BookList";
 
 const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
   const [books, setBooks] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [myBooks, setMyBooks] = useState([]); 
+  const [myBooks, setMyBooks] = useState([]);
 
   const ENDPOINT = "/api/books/search";
   const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -68,14 +68,14 @@ const SearchComponent = ({ onAddBook }) => {
 
   const handleAddBook = (book) => {
     // onAddBook(book);
-    setMyBooks((prev) => [...prev, book]); 
+    setMyBooks((prev) => [...prev, book]);
   };
 
   const handleRemoveBook = (bookToRemove) => {
     setMyBooks((prev) => prev.filter((b) => b.title !== bookToRemove.title));
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   return (
     <div className="search-root">
@@ -93,7 +93,7 @@ const SearchComponent = ({ onAddBook }) => {
 
       <div className="books-list">
         {books.map((b) => (
-          <div key={b.id || b.key || b.title} className="book-card">
+          <div key={b.id || b.key || b.title} className="book-card" style={{ height: "80px" }}>
             <div className="book-cover">
               <img
                 src={coverUrlFrom(b.cover_i)}
@@ -118,18 +118,12 @@ const SearchComponent = ({ onAddBook }) => {
                   })
                 }
               >
-                ➕ Agregar
+                <i class="fa-solid fa-plus"></i> Agregar
               </button>
             </div>
           </div>
         ))}
       </div>
-
-      {myBooks.length > 0 && (
-        <div className="mt-5">
-          <BookList books={myBooks} onRemoveBook={handleRemoveBook} />
-        </div>
-      )}
     </div>
   );
 };

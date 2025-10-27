@@ -3,20 +3,10 @@ import { Link } from "react-router-dom";
 export const Navbar = () => {
 
 	return (
-		<nav className="navbar navbar-light bg-light">
-			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
-				</Link>
-				<div className="ml-auto">
-					<Link to="/registro-usuario">
-						<button className="btn btn-primary">Registro</button>
-					</Link>
-					<Link to="/login">
-						<button className="btn btn-primary">Login</button>
-					</Link>
-				</div>
-			</div>
-		</nav>
+		<div style={{ position: "absolute", top: "6%", left: "85%", transform: "translate(-50%, -50%)", zIndex: 1 }}>
+			<Link to="/login" style={{ margin: "10px", padding: "8px 37px", backgroundColor: "#bb4a4a", color: "white", textDecoration: "none", borderRadius: "20px", fontSize: "x-large" }}>
+				Login
+			</Link>
+		</div>
 	);
 };
