@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash.debounce";
-import BookList from "./BookList";
 
 const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
@@ -67,12 +66,6 @@ const SearchComponent = ({ onAddBook }) => {
     // onAddBook(book);
     setMyBooks((prev) => [...prev, book]);
   };
-
-  const handleRemoveBook = (bookToRemove) => {
-    setMyBooks((prev) => prev.filter((b) => b.title !== bookToRemove.title));
-  };
-
-  useEffect(() => { }, []);
 
   return (
     <div className="search-root">
