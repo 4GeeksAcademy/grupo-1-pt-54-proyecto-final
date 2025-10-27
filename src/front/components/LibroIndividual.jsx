@@ -8,16 +8,25 @@ export const LibroIndividual = () => {
   const [estado, setEstado] = useState("No leído");
 
   const fetchLibro = async () => {
-    const ENDPOINT = "/api/books/search";
+
+    const ENDPOINT = `/api/books/${id}`;
     const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
     try {
-      const response = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${id}`);
+      const response = await fetch(`${BASE_API_URL}${ENDPOINT}`);
+      if (!response.ok) {
+        throw new Error(`http error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Respuesta no es JSON");
+      }
       const data = await response.json();
       setLibro(data);
 
-      if (data.progreso) {
-        setProgreso(data.progreso);
-        actualizarEstado(data.progreso);
+      if (data.progreso !== undefined && data.progreso !== null) {
+        const progresoNum = Number(data.progreso);
+        setProgreso(progresoNum);
+        actualizarEstado(progresoNum);
       }
     } catch (error) {
       console.error("Error fetching book details:", error);
@@ -31,17 +40,34 @@ export const LibroIndividual = () => {
     else setEstado("Leído");
   };
 
+  const actualizarProgreso = async (nuevoValor) => {
+    try {
+      const ENDPOINT = `/api/books/${id}`;
+      const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
+      await fetch(`${BASE_API_URL}${ENDPOINT}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ progreso: nuevoValor }),
+      });
+    } catch (error) {
+      console.error("Error al actualizar el progreso:", error);
+    }
+  };
+
   const handleProgresoChange = (e) => {
     const nuevoValor = Number(e.target.value);
     setProgreso(nuevoValor);
     actualizarEstado(nuevoValor);
+    actualizarProgreso(nuevoValor);
   };
 
   useEffect(() => {
     fetchLibro();
   }, [id]);
 
-  if (!libro) return <p>Cargando libro...</p>;
+  if (!libro) return <p>No se encuentra el libro...</p>;
 
   const coverUrl = libro.cover_i
     ? `https://covers.openlibrary.org/b/id/${libro.cover_i}-L.jpg`
@@ -73,19 +99,7 @@ export const LibroIndividual = () => {
 
         <div style={{ marginBottom: "25px" }}>
           <label htmlFor="progreso" style={{ fontSize: "large", color: "darkslategray" }}>
-            Estado:{" "}
-            <strong
-              style={{
-                color:
-                  estado === "Leído"
-                    ? "green"
-                    : estado === "En progreso"
-                    ? "orange"
-                    : "gray",
-              }}
-            >
-              {estado}
-            </strong>
+            Progreso:
           </label>
           <input
             type="range"
@@ -97,7 +111,7 @@ export const LibroIndividual = () => {
             style={{
               width: "100%",
               marginTop: "10px",
-              accentColor: "darkolivegreen",
+              accentColor: "green",
               cursor: "pointer",
             }}
           />

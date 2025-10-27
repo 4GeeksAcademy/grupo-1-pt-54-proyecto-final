@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EliminarLibro } from "./EliminarLibro"
 import SearchComponent from "./SearchComponent"
 import { Link } from 'react-router-dom';
+import { BookStatus } from "./BookStatus"
 export const Dashboard = () => {
     const [books, setBooks] = useState([
         { id: 1, title: "Ejemplo de libro", author: "Autor Ejemplo" },
@@ -34,6 +35,7 @@ export const Dashboard = () => {
                                 <div style={{ padding: '1rem' }}>
                                     <h5 style={{ marginBottom: '0.5rem' }}>{book.title}</h5>
                                     <p style={{ color: '#6C757D', marginBottom: '1rem' }}>{book.author}</p>
+                                    <BookStatus style={{ margin: '15px', marginLeft: '-54px' }} />
                                     <div className="">
                                         <Link to={`/libro-individual/${book.id}`} style={{ marginRight: "15px" }}>
                                             <button className="btn btn-success">Ver libro</button>
