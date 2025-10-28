@@ -37,6 +37,7 @@ export const router = createBrowserRouter(
         <Route path="/registro-usuario" element={<RegistroUsuario />} />
         <Route path="/login" element={<Login />} />
         <Route path="/recuperacion" element={<Recuperacion />} />
+        <Route path="/reset" element={<NuevaContrasena />} />
         <Route path="/eliminar-libro" element={<EliminarLibro />} />
         <Route path="/book-status" element={<BookStatus />} />
         <Route path="/verify" element={<Verify />} /> 

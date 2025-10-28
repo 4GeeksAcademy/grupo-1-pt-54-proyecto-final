@@ -11,7 +11,7 @@ export const Layout = () => {
     const isRegisterPath = location.pathname == "/registro-usuario" ? true : false
     const isLoginPath = location.pathname == "/login" ? true : false
     const isLandingPage = location.pathname == "/" ? true : false
-    const isLibroIndividual = location.pathname == "/libro-individual/1" ? true : false
+    const isLibroIndividual = location.pathname.startsWith("/libro-individual/") ? true : false
     const isRecuperacion = location.pathname == "/recuperacion" ? true : false
     const isDashboard = location.pathname == "/dashboard" ? true : false
     const isReset = location.pathname == "/reset" ? true : false

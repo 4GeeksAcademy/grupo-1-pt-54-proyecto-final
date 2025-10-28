@@ -1,32 +1,26 @@
 
-import { useParams } from "react-router-dom";
-
-
 export const EliminarLibro = ({ id, onDelete }) => {
-   // const { id } = useParams();
-
     const deleteBook = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:3001/api/books/${id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
 
-            if (response.ok) {
+            const result = await response.json();
+
+            if (response.ok && result.success) {
                 console.log("Book deleted successfully");
                 if (onDelete) onDelete(id);
             } else {
-                const errorData = await response.json();
-                console.error("Failed to delete book");
-                alert(errorData.message || "Failed to delete book");
+                console.error("Failed to delete book", result);
+                alert(result.message || "Failed to delete book");
             }
         } catch (error) {
             console.error("Error deleting book:", error);
-            alert("An error occurred while deleting the book. Please try again.");
+            alert("Ocurrió un error al eliminar el libro. Intenta nuevamente.");
         }
     };
 
@@ -50,17 +44,36 @@ export const EliminarLibro = ({ id, onDelete }) => {
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h1 className="modal-title fs-5" id={`#confirmation-${id}`}>REMOVE</h1>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+                            <h1 className="modal-title fs-5" id={`#confirmation-${id}`}>
+                                REMOVE
+                            </h1>
+                            <button
+                                type="button"
+                                className="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            />
                         </div>
+
                         <div className="modal-body">
                             Are you sure? After deleting this book all changes will be deleted. You will no longer see your book in your reading list.
                         </div>
+
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                data-bs-dismiss="modal"
+                            >
                                 Cancel
                             </button>
-                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={deleteBook}>
+
+                            <button
+                                type="button"
+                                className="btn btn-danger"
+                                data-bs-dismiss="modal"
+                                onClick={deleteBook}
+                            >
                                 I'm sure
                             </button>
                         </div>
