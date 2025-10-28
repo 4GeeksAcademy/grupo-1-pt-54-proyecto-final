@@ -16,6 +16,7 @@ import { EliminarLibro } from "./components/EliminarLibro";
 import { BookStatus } from "./components/BookStatus";
 import { Dashboard } from "./components/Dashboard"
 import { Verify } from "./pages/Verify";
+import { NuevaContrasena } from "./pages/Recuperacion";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -38,6 +39,6 @@ export const router = createBrowserRouter(
         <Route path="/recuperacion" element={<Recuperacion />} />
         <Route path="/eliminar-libro" element={<EliminarLibro />} />
         <Route path="/book-status" element={<BookStatus />} />
-      <Route path="/verify" element={<Verify />} />
+        <Route path="/verify" element={<Verify />} /> 
     </Route>
   ))

@@ -14,14 +14,15 @@ export const Layout = () => {
     const isLibroIndividual = location.pathname == "/libro-individual/1" ? true : false
     const isRecuperacion = location.pathname == "/recuperacion" ? true : false
     const isDashboard = location.pathname == "/dashboard" ? true : false
+    const isReset = location.pathname == "/reset" ? true : false
 
 
     /*use condicional to not show navbar y footer in other  ==*/
     return (
         <ScrollToTop>
-            {isRegisterPath || isLoginPath || isLandingPage || isRecuperacion || isDashboard ? "" : isLibroIndividual ? <NavbarLibroIndividual /> : <Navbar />}
+            {isRegisterPath || isLoginPath || isLandingPage || isRecuperacion || isDashboard || isReset ? "" : isLibroIndividual ? <NavbarLibroIndividual /> : <Navbar />}
             <Outlet />
-            {isRegisterPath || isLoginPath ? "" : <Footer />}
+            {isRegisterPath || isLoginPath || isReset || isRecuperacion  ? "" : <Footer />}
         </ScrollToTop>
     )
 }

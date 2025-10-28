@@ -24,7 +24,9 @@ export const LibroIndividual = () => {
     const ENDPOINT = `/api/books/${id}`;
     const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
     try {
-      const response = await fetch(`${BASE_API_URL}${ENDPOINT}`);
+      const response = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${id}`,{
+      headers: {
+        "Content-Type": "application/json"   },}););
       if (!response.ok) {
         throw new Error(`http error! status: ${response.status}`);
       }

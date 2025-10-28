@@ -13,6 +13,10 @@ from api.commands import setup_commands
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, decode_token
+import urllib.request
+import urllib.parse
+import json
+import os
 from flask_mail import Mail, Message
 import datetime
 from sqlalchemy import select
@@ -163,6 +167,32 @@ def verify_token(token):
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
 
+# forgot_password
+
+
+@app.route('/api/forgot', methods=['POST'])
+def forgot_password():
+    try:
+        data = request.get_json(silent=True)
+        email = data.get("email", None)
+        user = db.session.execute(db.select(User).filter_by(
+            email=email)).scalar_one_or_none()
+
+        expires = datetime.timedelta(hours=12)
+        token = create_access_token(identity=email, expires_delta=expires)
+        reset_link = f"{os.getenv('VITE_FRONTEND_URL')}reset?token={token}"
+
+        msg = Message("Recuperar contraseña", recipients=[email])
+        msg.body = f"Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace por favor: \n\n {reset_link}"
+        mail.send(msg)
+
+        return jsonify({"msg": "Correo de recuperación enviado"}), 200
+
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({"msg": "Token inválido"}), 400
+
 
 @app.route('/api/reset-password/<token>', methods=['POST'])
 def handle_reset_password(token):
@@ -170,10 +200,7 @@ def handle_reset_password(token):
     try:
         decoded_data = decode_token(token)
         data = request.get_json(silent=True)
-        new_password = data.get("password", None)
-        print(new_password)
         email = decoded_data.get("sub")
-
         user = db.session.execute(
             db.select(User).filter_by(email=email)
         ).scalar_one_or_none()
@@ -181,10 +208,10 @@ def handle_reset_password(token):
         if not user:
             return jsonify({"msg": "Usuario no encontrado"}), 404
 
+        new_password = data.get("password", None)
         password_hash = bcrypt.generate_password_hash(
             new_password).decode('utf-8')
         user.password = password_hash
-
         db.session.commit()
 
         return jsonify({"msg": "Contraseña actualizada"}), 200
@@ -194,27 +221,55 @@ def handle_reset_password(token):
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
 
-# forgot_password
-@app.route('/api/forgot', methods=['POST'])
-def forgot_password():
-    try:
-        data = request.get_json(silent=True)
-        email = data.get("email", None)
-        user = db.session.execute(db.select(User).filter_by(email=email)).scalar_one_or_none()
 
-        token = create_access_token(identifier=email, expires_delta=False)
-        reset_link = f"{os.getenv('VITE_FRONTEND_URL')}/reset?token={token}"
 
-        msg = Message("Recuperar contraseña", recipients=[email])
-        msg.body = f"Hola, para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_link}"
-        mail.send(msg)
+BOOKS_FILE = "books.json"
 
-        return jsonify({"msg": "Correo de recuperación enviado"}), 200
-    
-    except Exception as error:
-        print(error)
-        db.session.rollback()
-        return jsonify({"msg": "Error al enviar el correo"}), 400
+
+def load_books():
+    if not os.path.exists(BOOKS_FILE):
+        with open(BOOKS_FILE, "w") as f:
+            json.dump([], f)
+    with open(BOOKS_FILE, "r") as f:
+        return json.load(f)
+
+
+def save_books(books):
+    with open(BOOKS_FILE, "w") as f:
+        json.dump(books, f, indent=2)
+
+
+@app.route("/api/books", methods=["GET"])
+def get_books():
+    """Return saved books."""
+    return jsonify(load_books()), 200
+
+
+@app.route("/api/books", methods=["POST"])
+def add_book():
+    """Add a book to local storage."""
+    new_book = request.get_json()
+    if not new_book or "title" not in new_book:
+        return jsonify({"success": False, "message": "Datos inválidos"}), 400
+    books = load_books()
+ 
+    if any(b["title"].lower() == new_book["title"].lower() for b in books):
+        return jsonify({"success": False, "message": "El libro ya existe"}), 400
+    new_book["id"] = new_book.get("id") or str(len(books) + 1)
+    books.append(new_book)
+    save_books(books)
+    return jsonify({"success": True, "message": "Libro agregado", "book": new_book}), 201
+
+
+@app.route("/api/books/<id>", methods=["GET"])
+def get_single_book(id):
+    """Return a specific saved book."""
+    books = load_books()
+    book = next((b for b in books if str(b["id"]) == id), None)
+    if not book:
+        return jsonify({"success": False, "message": "Libro no encontrado"}), 404
+    return jsonify(book), 200 
+
 
 @app.route('/api/books/<int:book_id>', methods=['PUT'])
 @jwt_required()
@@ -278,6 +333,8 @@ def delete_book(book_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
+
+
 
 
 # this only runs if ⁠ $ python src/main.py ⁠ is executed
