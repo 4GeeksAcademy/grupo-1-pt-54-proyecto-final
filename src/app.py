@@ -21,7 +21,6 @@ from flask_mail import Mail, Message
 import datetime
 from sqlalchemy import select
 # from models import Person
-
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../dist/')
@@ -29,18 +28,14 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 CORS(app)
 jwt = JWTManager(app)
-
 app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
 app.config["MAIL_PORT"] = os.getenv("MAIL_PORT")
 app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS")
 app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
 app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
 app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-
 mail = Mail(app)
-
 app.url_map.strict_slashes = False
-
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
@@ -48,27 +43,21 @@ if db_url is not None:
         "postgres://", "postgresql://")
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db, compare_type=True)
 db.init_app(app)
-
 # add the admin
 setup_admin(app)
-
 # add the admin
 setup_commands(app)
-
 # Add all endpoints form the API with a "api" prefix
 app.register_blueprint(api, url_prefix='/api')
-
 # Handle/serialize errors like a JSON object
 
 
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
-
 # generate sitemap with all your endpoints
 
 
@@ -77,7 +66,6 @@ def sitemap():
     if ENV == "development":
         return generate_sitemap(app)
     return send_from_directory(static_file_dir, 'index.html')
-
 # any other endpoint will try to serve it like a static file
 
 
@@ -95,13 +83,10 @@ def login():
     data = request.get_json(silent=True)
     email = data.get("email")
     password = data.get("password")
-
     if not email or not password:
         return jsonify({"success": False, "message": "Faltan credenciales"}), 400
-
     user = db.session.execute(db.select(User).filter_by(
         email=email)).scalar_one_or_none()
-
     if user and bcrypt.check_password_hash(user.password, password):
         access_token = create_access_token(identity=str(user.id))
         return jsonify({"success": True, "message": "Login exitoso", "access_token": access_token}), 200
@@ -117,13 +102,10 @@ def handle_register():
     is_active = data.get("is_active", True)
     first_name = data.get("first_name", None)
     last_name = data.get("last_name", None)
-
     if not email or not password or not first_name or not last_name:
         return jsonify({"success": False, "message": "Faltan datos obligatorios"}), 400
-
     user = db.session.execute(db.select(User).filter_by(
         email=email)).scalar_one_or_none()
-
     if user:
         return jsonify({"success": False, "message": "El usuario ya existe"}), 400
     else:
@@ -132,16 +114,12 @@ def handle_register():
         data['password'] = hashed_password
         data['is_active'] = is_active
         new_user = User.create_user(data)
-
         expires = datetime.timedelta(hours=12)
-
         token = create_access_token(identity=email, expires_delta=expires)
         verify_link = f"{os.getenv("VITE_FRONTEND_URL")}verify?token={token}"
-
         msg = Message("Verificación de cuenta", recipients=[email])
         msg.body = f"Hola {first_name} de parte de Read & Read! \n\nEsperemos que se encuentre bien! Por favor verifica tu cuenta haciendo clic en el siguiente enlace: \n\n {verify_link}"
         mail.send(msg)
-
         if new_user:
             return jsonify({"success": True, "message": "Usuario creado exitosamente", "user": new_user.serialize()}), 201
         else:
@@ -150,12 +128,10 @@ def handle_register():
 
 @app.route('/api/verify/<token>', methods=['GET'])
 def verify_token(token):
-
     try:
         data = decode_token(token)
         user = db.session.execute(db.select(User).filter_by(
             email=data["sub"])).scalar_one_or_none()
-
         if user:
             user.is_verified = True
             user.is_active = True
@@ -166,7 +142,6 @@ def verify_token(token):
         print(error)
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
-
 # forgot_password
 
 
@@ -177,17 +152,13 @@ def forgot_password():
         email = data.get("email", None)
         user = db.session.execute(db.select(User).filter_by(
             email=email)).scalar_one_or_none()
-
         expires = datetime.timedelta(hours=12)
         token = create_access_token(identity=email, expires_delta=expires)
         reset_link = f"{os.getenv('VITE_FRONTEND_URL')}reset?token={token}"
-
         msg = Message("Recuperar contraseña", recipients=[email])
         msg.body = f"Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace por favor: \n\n {reset_link}"
         mail.send(msg)
-
         return jsonify({"msg": "Correo de recuperación enviado"}), 200
-
     except Exception as error:
         print(error)
         db.session.rollback()
@@ -196,7 +167,6 @@ def forgot_password():
 
 @app.route('/api/reset-password/<token>', methods=['POST'])
 def handle_reset_password(token):
-
     try:
         decoded_data = decode_token(token)
         data = request.get_json(silent=True)
@@ -204,23 +174,18 @@ def handle_reset_password(token):
         user = db.session.execute(
             db.select(User).filter_by(email=email)
         ).scalar_one_or_none()
-
         if not user:
             return jsonify({"msg": "Usuario no encontrado"}), 404
-
         new_password = data.get("password", None)
         password_hash = bcrypt.generate_password_hash(
             new_password).decode('utf-8')
         user.password = password_hash
         db.session.commit()
-
         return jsonify({"msg": "Contraseña actualizada"}), 200
-
     except Exception as error:
         print(error)
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
-
 
 
 BOOKS_FILE = "books.json"
@@ -241,34 +206,41 @@ def save_books(books):
 
 @app.route("/api/books", methods=["GET"])
 def get_books():
-    """Return saved books."""
     return jsonify(load_books()), 200
 
 
 @app.route("/api/books", methods=["POST"])
 def add_book():
-    """Add a book to local storage."""
     new_book = request.get_json()
     if not new_book or "title" not in new_book:
         return jsonify({"success": False, "message": "Datos inválidos"}), 400
     books = load_books()
- 
     if any(b["title"].lower() == new_book["title"].lower() for b in books):
         return jsonify({"success": False, "message": "El libro ya existe"}), 400
-    new_book["id"] = new_book.get("id") or str(len(books) + 1)
+    new_book["id"] = int(new_book.get("id") or len(books) + 1)
     books.append(new_book)
     save_books(books)
     return jsonify({"success": True, "message": "Libro agregado", "book": new_book}), 201
 
 
-@app.route("/api/books/<id>", methods=["GET"])
+@app.route("/api/books/<int:id>", methods=["GET"])
 def get_single_book(id):
-    """Return a specific saved book."""
     books = load_books()
-    book = next((b for b in books if str(b["id"]) == id), None)
+    book = next((b for b in books if int(b["id"]) == id), None)
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
-    return jsonify(book), 200 
+
+
+    book_data = {
+        "id": book.get("id"),
+        "title": book.get("title", "Sin título"),
+        "author": book.get("author", "Autor desconocido"),
+        "cover_i": book.get("cover_i", None),  # can be None if no image
+        "progreso": book.get("progreso", 0),
+        "sinopsis": book.get("sinopsis", "")
+    }
+
+    return jsonify(book_data), 200
 
 
 @app.route('/api/books/<int:book_id>', methods=['PUT'])
@@ -277,21 +249,16 @@ def update_book_state(book_id):
     user_id = int(get_jwt_identity())
     data = request.get_json(silent=True)
     nuevo_estado = data.get("state")
-
     estados_validos = ["en_proceso", "en_espera", "finalizado"]
-
     if nuevo_estado not in estados_validos:
         return jsonify({"success": False, "message": "Estado no válido"}), 400
-
     from api.models import Book
     book = db.session.execute(db.select(Book).filter_by(
         id=book_id)).scalar_one_or_none()
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
-
     if book.user_id != user_id:
         return jsonify({"success": False, "message": "No tienes permiso para modificar este libro"}), 403
-
     try:
         book.state = nuevo_estado
         db.session.commit()
@@ -309,20 +276,36 @@ def update_book_state(book_id):
         return jsonify({"success": False, "message": "Error al actualizar el estado"}), 500
 
 
+@app.route("/api/books/<int:id>", methods=["PATCH"])
+def update_book_progress(id):
+    data = request.get_json(silent=True)
+    nuevo_progreso = data.get("progreso")
+    if nuevo_progreso is None or not isinstance(nuevo_progreso, (int, float)):
+        return jsonify({"success": False, "message": "Progreso inválido"}), 400
+    books = load_books()
+    book = next((b for b in books if int(b["id"]) == id), None)
+    if not book:
+        return jsonify({"success": False, "message": "Libro no encontrado"}), 404
+    book["progreso"] = nuevo_progreso
+    save_books(books)
+    return jsonify({
+        "success": True,
+        "message": "Progreso actualizado correctamente",
+        "book": book
+    }), 200
+
+
 @app.route('/api/books/<int:book_id>', methods=['DELETE'])
 @jwt_required()
 def delete_book(book_id):
     user_id = int(get_jwt_identity())
-
     from api.models import Book
     book = db.session.execute(db.select(Book).filter_by(
         id=book_id)).scalar_one_or_none()
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
-
     if book.user_id != user_id:
         return jsonify({"success": False, "message": "No puedes eliminar este libro"}), 403
-
     try:
         db.session.delete(book)
         db.session.commit()
@@ -335,9 +318,6 @@ def delete_book(book_id):
         return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
 
 
-
-
-# this only runs if ⁠ $ python src/main.py ⁠ is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
     app.run(host='0.0.0.0', port=PORT, debug=True)

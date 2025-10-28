@@ -1,6 +1,16 @@
 [
   {
     "title": "The Hobbit",
-    "id": "1"
+    "id": "1",
+    "progreso": 82
+  },
+  {
+    "title": "Cien A\u00f1os de Soledad",
+    "author": "Gabriel Garc\u00eda M\u00e1rquez",
+    "cover_i": 123456,
+    "state": "No le\u00eddo",
+    "sinopsis": "Una novela sobre la historia de la familia Buend\u00eda.",
+    "id": 2,
+    "progreso": 8
   }
 ]

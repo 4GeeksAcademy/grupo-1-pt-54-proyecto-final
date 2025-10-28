@@ -6,36 +6,35 @@ export const LibroIndividual = () => {
   const [libro, setLibro] = useState(null);
   const [progreso, setProgreso] = useState(0);
   const [estado, setEstado] = useState("No leído");
+  const [loading, setLoading] = useState(true);
 
-  if (!id || id.trim().length < 2) return;
-  const fetchLibro = async () => {
+  useEffect(() => {
+    if (!id || id.trim().length < 1) return;
 
-    const ENDPOINT = `/api/books/${id}`;
-    const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
-    try {
-      const response = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${id}`,{
-      headers: {
-        "Content-Type": "application/json"   },}););
-      if (!response.ok) {
-        throw new Error(`http error! status: ${response.status}`);
-      }
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Respuesta no es JSON");
-      }
-      const data = await response.json();
-      setLibro(data);
+    const fetchLibro = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json"))
+          throw new Error("Respuesta no es JSON");
 
-      if (data.progreso !== undefined && data.progreso !== null) {
-        const progresoNum = Number(data.progreso);
+        const data = await response.json();
+        setLibro(data);
+
+        const progresoNum = Number(data.progreso ?? 0);
         setProgreso(progresoNum);
         actualizarEstado(progresoNum);
+      } catch (error) {
+        console.error("Error fetching book details:", error);
+        setLibro(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching book details:", error);
-      setLibro(null);
-    }
-  };
+    };
+
+    fetchLibro();
+  }, [id]);
 
   const actualizarEstado = (valor) => {
     if (valor === 0) setEstado("No leído");
@@ -45,15 +44,12 @@ export const LibroIndividual = () => {
 
   const actualizarProgreso = async (nuevoValor) => {
     try {
-      const ENDPOINT = `/api/books/${id}`;
-      const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
-      await fetch(`${BASE_API_URL}${ENDPOINT}`, {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ progreso: nuevoValor }),
       });
+      setLibro({ ...libro, progreso: nuevoValor }); // Update local state
     } catch (error) {
       console.error("Error al actualizar el progreso:", error);
     }
@@ -66,10 +62,7 @@ export const LibroIndividual = () => {
     actualizarProgreso(nuevoValor);
   };
 
-  useEffect(() => {
-    fetchLibro();
-  }, [id]);
-
+  if (loading) return <p>Cargando libro...</p>;
   if (!libro) return <p>No se encuentra el libro...</p>;
 
   const coverUrl = libro.cover_i
@@ -119,7 +112,7 @@ export const LibroIndividual = () => {
             }}
           />
           <p style={{ textAlign: "right", fontSize: "small", color: "#555" }}>
-            {progreso}%
+            {progreso}% - {estado}
           </p>
         </div>
 
