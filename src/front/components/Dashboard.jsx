@@ -36,9 +36,30 @@ export const Dashboard = () => {
                     {books.map(book => (
                         <div key={book.id} className="book-card">
                             <div style={{ borderRadius: '10px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', transition: 'transform 0.3s', marginBottom: '20px', height: '100%', border: 'none', background: 'white' }}>
-                                <div style={{ height: '200px', borderRadius: '10px 10px 0 0', backgroundColor: '#6C757D', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '3rem' }}>
-                                    <i className="fa-solid fa-book"></i>
+                                <div style={{
+                                    height: '200px',
+                                    borderRadius: '10px 10px 0 0',
+                                    backgroundColor: '#6C757D',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden'
+                                }}>
+                                    {book.image_url ? (
+                                        <img
+                                            src={book.image_url}
+                                            alt={book.title}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover'
+                                            }}
+                                        />
+                                    ) : (
+                                        <i className="fa-solid fa-book" style={{ color: 'white', fontSize: '3rem' }}></i>
+                                    )}
                                 </div>
+
                                 <div style={{ padding: '1rem' }}>
                                     <h5 style={{ marginBottom: '0.5rem' }}>{book.title}</h5>
                                     <p style={{ color: '#6C757D', marginBottom: '1rem' }}>{book.author}</p>
