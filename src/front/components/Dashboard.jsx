@@ -63,7 +63,9 @@ export const Dashboard = () => {
                                 <div style={{ padding: '1rem' }}>
                                     <h5 style={{ marginBottom: '0.5rem' }}>{book.title}</h5>
                                     <p style={{ color: '#6C757D', marginBottom: '1rem' }}>{book.author}</p>
-                                    <BookStatus style={{ margin: '15px', marginLeft: '-54px' }} />
+                                    <BookStatus id={book.id}
+                                        progreso={book.progreso ?? 0}
+                                        style={{ margin: '15px', marginLeft: '-54px' }} />
                                     <div className="">
                                         <Link to={`/libro-individual/${book.id}`} style={{ marginRight: "15px" }}>
                                             <button className="btn btn-success">Ver libro</button>

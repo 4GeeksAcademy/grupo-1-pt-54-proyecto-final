@@ -5,8 +5,14 @@ export const LibroIndividual = () => {
   const { id } = useParams();
   const [libro, setLibro] = useState(null);
   const [progreso, setProgreso] = useState(0);
-  const [estado, setEstado] = useState("No leído");
+  const [estado, setEstado] = useState("Por leer");
   const [loading, setLoading] = useState(true);
+
+  const getEstadoDesdeProgreso = (valor) => {
+    if (valor === 0) return "Por leer";
+    if (valor > 0 && valor < 100) return "En progreso";
+    return "Leído";
+  };
 
   useEffect(() => {
     if (!id || id.trim().length < 1) return;
@@ -24,7 +30,7 @@ export const LibroIndividual = () => {
 
         const progresoNum = Number(data.progreso ?? 0);
         setProgreso(progresoNum);
-        actualizarEstado(progresoNum);
+        setEstado(getEstadoDesdeProgreso(progresoNum));
       } catch (error) {
         console.error("Error fetching book details:", error);
         setLibro(null);
@@ -36,12 +42,6 @@ export const LibroIndividual = () => {
     fetchLibro();
   }, [id]);
 
-  const actualizarEstado = (valor) => {
-    if (valor === 0) setEstado("No leído");
-    else if (valor > 0 && valor < 100) setEstado("En progreso");
-    else setEstado("Leído");
-  };
-
   const actualizarProgreso = async (nuevoValor) => {
     try {
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`, {
@@ -49,7 +49,7 @@ export const LibroIndividual = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ progreso: nuevoValor }),
       });
-      setLibro({ ...libro, progreso: nuevoValor }); // Update local state
+      setLibro({ ...libro, progreso: nuevoValor });
     } catch (error) {
       console.error("Error al actualizar el progreso:", error);
     }
@@ -58,7 +58,8 @@ export const LibroIndividual = () => {
   const handleProgresoChange = (e) => {
     const nuevoValor = Number(e.target.value);
     setProgreso(nuevoValor);
-    actualizarEstado(nuevoValor);
+    const nuevoEstado = getEstadoDesdeProgreso(nuevoValor);
+    setEstado(nuevoEstado);
     actualizarProgreso(nuevoValor);
   };
 
