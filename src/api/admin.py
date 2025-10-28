@@ -7,7 +7,10 @@ from flask_admin.contrib.sqla import ModelView
 def setup_admin(app):
     app.secret_key = os.environ.get('FLASK_APP_KEY', 'sample key')
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-    admin = Admin(app, name='4Geeks Admin', template_mode='bootstrap3')
+    # Some versions of flask-admin don't accept the `template_mode` keyword
+    # in the constructor. Create the Admin instance without that argument
+    # to remain compatible with the installed package.
+    admin = Admin(app, name='4Geeks Admin')
 
     
     # Add your models here, for example this is how we add a the User model to the admin
