@@ -12,5 +12,14 @@
     "sinopsis": "Una novela sobre la historia de la familia Buend\u00eda.",
     "id": 2,
     "progreso": 8
+  },
+  {
+    "title": "hola",
+    "author": "M\u00e1rquez",
+    "cover_i": 123456,
+    "state": "No le\u00eddo",
+    "sinopsis": "que",
+    "id": 3,
+    "progreso": 22
   }
 ]

@@ -8,8 +8,6 @@ const SearchComponent = ({ onAddBook }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [myBooks, setMyBooks] = useState([]);
 
-  const ENDPOINT = "/api/books/search";
-  const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
   const coverUrlFrom = (cover_i) => `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
      
   const showData = async (query = "") => {
@@ -23,7 +21,7 @@ const SearchComponent = ({ onAddBook }) => {
       }
 
       const resp = await fetch(
-        `${BASE_API_URL}${ENDPOINT}?title=${encodeURIComponent(trimmed)}`
+        `${import.meta.env.VITE_BACKEND_URL}/api/books/search?title=${encodeURIComponent(trimmed)}`
       );
       if (resp.status === 304) {
         console.log("Response 304: Not Modified — reusing previous results.");
@@ -105,7 +103,7 @@ const SearchComponent = ({ onAddBook }) => {
                   })
                 }
               >
-                <i class="fa-solid fa-plus"></i> Agregar
+                <i className="fa-solid fa-plus"></i> Agregar
               </button>
             </div>
           </div>
