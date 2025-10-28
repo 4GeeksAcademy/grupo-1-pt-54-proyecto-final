@@ -1,38 +1,22 @@
-import { useParams } from "react-router-dom";
 
 export const EliminarLibro = ({ id, onDelete }) => {
     const deleteBook = async () => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("No se encontró un token de autenticación. Por favor, inicia sesión nuevamente.");
-            console.error("Token ausente en localStorage");
-            return;
-        }
-
         try {
-            console.log("Enviando DELETE con token:", token); // Para depuración
             const response = await fetch(
-                `https://effective-space-spoon-975rgjpwg5xqcpg6r-3001.app.github.dev/api/books/${id}`,
+                `${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`,
                 {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
+                    method: "DELETE"
                 }
             );
 
-            if (response.ok) {
+            const result = await response.json();
+
+            if (response.ok && result.success) {
                 console.log("Book deleted successfully");
                 if (onDelete) onDelete(id);
-            } else if (response.status === 401) {
-                alert("No autorizado. Tu sesión ha expirado o el token es inválido.");
-                console.error("Error 401: Unauthorized");
             } else {
-                const errorData = await response.json();
-                console.error("Failed to delete book", errorData);
-                alert(errorData.message || "Failed to delete book");
+                console.error("Failed to delete book", result);
+                alert(result.message || "Failed to delete book");
             }
         } catch (error) {
             console.error("Error deleting book:", error);
@@ -60,7 +44,9 @@ export const EliminarLibro = ({ id, onDelete }) => {
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h1 className="modal-title fs-5" id={`#confirmation-${id}`}>REMOVE</h1>
+                            <h1 className="modal-title fs-5" id={`#confirmation-${id}`}>
+                                REMOVE
+                            </h1>
                             <button
                                 type="button"
                                 className="btn-close"
