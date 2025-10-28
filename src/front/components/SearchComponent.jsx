@@ -76,6 +76,8 @@ const SearchComponent = ({ onAddBook }) => {
         setMyBooks(prev => [...prev, data.book]);
         toast.success('Libro agregado correctamente')
         setSuggestions([]);
+        setBooks([]);
+        setSearch("");
         if (onAddBook) onAddBook(data.book);
       } else {
         toast.error("Error al agregar el libro")

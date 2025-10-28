@@ -33,8 +33,8 @@ export const Dashboard = () => {
                 <div className="" style={{ width: "500px", padding: "0" }}>
                     <SearchComponent onAddBook={(newBook) => setBooks(prev => [...prev, newBook])} />
                 </div>
-                <div style={{ position: "absolute", top: "29%", left: "85%", transform: "translate(-50%, -50%)", zIndex: 1 }}>
-                    <Link to="/login" style={{ margin: "10px 0 0 150px", padding: "8px 37px", backgroundColor: "#bb4a4a", color: "white", textDecoration: "none", borderRadius: "20px", fontSize: "x-large" }}>
+                <div style={{ position: "absolute", top: "52%", left: "85%", transform: "translate(-50%, -50%)", zIndex: 1 }}>
+                    <Link to="/login" style={{ margin: "10px 0 0 150px", padding: "0 23px 0 23px", backgroundColor: "#614abbff", color: "white", textDecoration: "none", borderRadius: "20px", fontSize: "x-large" }}>
                         Logout
                     </Link>
                 </div>
