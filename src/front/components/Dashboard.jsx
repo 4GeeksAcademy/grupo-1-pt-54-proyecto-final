@@ -28,7 +28,7 @@ export const Dashboard = () => {
                     </div>
                 </div>
                 <div className="" style={{ width: "500px", padding: "0" }}>
-                    <SearchComponent />
+                    <SearchComponent onAddBook={(newBook) => setBooks(prev => [...prev, newBook])} />
                 </div>
             </div>
             <div style={{ marginTop: '48px', padding: '20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>

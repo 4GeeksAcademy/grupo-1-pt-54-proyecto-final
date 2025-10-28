@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash.debounce";
+import toast, { Toaster } from "react-hot-toast";
 
 const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
@@ -7,9 +8,11 @@ const SearchComponent = ({ onAddBook }) => {
   const [mensaje, setMensaje] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [myBooks, setMyBooks] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
 
   const coverUrlFrom = (cover_i) => `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
-     
+
   const showData = async (query = "") => {
     try {
       const trimmed = query.trim();
@@ -54,19 +57,41 @@ const SearchComponent = ({ onAddBook }) => {
     debouncedSearch(value);
   };
 
-  const pickSuggestion = (book) => {
-    setSearch(book.title);
-    setSuggestions([]);
-    setBooks([book]);
-  };
+  const handleAddBook = async (book) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: book.title,
+          author: book.author,
+          cover_i: book.cover_i,
+          sinopsis: book.description
+        })
+      });
 
-  const handleAddBook = (book) => {
-    // onAddBook(book);
-    setMyBooks((prev) => [...prev, book]);
+      const data = await response.json();
+
+      if (data.success) {
+        setMyBooks(prev => [...prev, data.book]);
+        toast.success('Libro agregado correctamente')
+        setSuggestions([]);
+        if (onAddBook) onAddBook(data.book);
+      } else {
+        toast.error("Error al agregar el libro")
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al conectar con el servidor")
+    }
   };
 
   return (
     <div className="search-root">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      />
       <div className="search-bar-container">
         <input
           value={search}
@@ -100,6 +125,8 @@ const SearchComponent = ({ onAddBook }) => {
                     id: b.id || b.key || Date.now(),
                     title: b.title,
                     author: b.authors || "Autor desconocido",
+                    cover_i: b.cover_i,
+                    description: b.description
                   })
                 }
               >
