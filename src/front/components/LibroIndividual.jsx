@@ -7,6 +7,18 @@ export const LibroIndividual = () => {
   const [progreso, setProgreso] = useState(0);
   const [estado, setEstado] = useState("No leído");
 
+  const [bookState, setBookState] = useState(() => {
+    return localStorage.getItem(`bookState_${id}`) || "Por leer";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`bookState_${id}`, bookState);
+  }, [bookState, id]);
+
+  const handleChangeState = (e) => {
+    setBookState(e.target.value);
+  };
+
   const fetchLibro = async () => {
 
     const ENDPOINT = `/api/books/${id}`;
