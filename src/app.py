@@ -67,7 +67,7 @@ def serve_any_other_file(path):
     if not os.path.isfile(os.path.join(static_file_dir, path)):
         path = 'index.html'
     response = send_from_directory(static_file_dir, path)
-    response.cache_control.max_age = 0 
+    response.cache_control.max_age = 0
     return response
 
 
@@ -135,6 +135,7 @@ def verify_token(token):
         print(error)
         db.session.rollback()
         return jsonify({"msg": "Token inválido"}), 400
+
 
 @app.route('/api/forgot', methods=['POST'])
 def forgot_password():
@@ -221,7 +222,6 @@ def get_single_book(id):
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
 
-
     book_data = {
         "id": book.get("id"),
         "title": book.get("title", "Sin título"),
@@ -286,27 +286,17 @@ def update_book_progress(id):
     }), 200
 
 
-@app.route('/api/books/<int:book_id>', methods=['DELETE'])
-@jwt_required()
-def delete_book(book_id):
-    user_id = int(get_jwt_identity())
-    from api.models import Book
-    book = db.session.execute(db.select(Book).filter_by(
-        id=book_id)).scalar_one_or_none()
+@app.route("/api/books/<int:id>", methods=["DELETE"])
+def delete_book_json(id):
+    books = load_books()
+    book = next((b for b in books if int(b["id"]) == id), None)
+
     if not book:
         return jsonify({"success": False, "message": "Libro no encontrado"}), 404
-    if book.user_id != user_id:
-        return jsonify({"success": False, "message": "No puedes eliminar este libro"}), 403
-    try:
-        db.session.delete(book)
-        db.session.commit()
-        return jsonify({
-            "success": True,
-            "message": f"Libro '{book.title}' eliminado correctamente"
-        }), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "message": "Error al eliminar el libro"}), 500
+
+    books = [b for b in books if int(b["id"]) != id]
+    save_books(books)
+    return jsonify({"success": True, "message": "Libro eliminado correctamente"}), 200
 
 
 if __name__ == '__main__':
