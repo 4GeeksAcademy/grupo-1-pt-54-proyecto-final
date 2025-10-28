@@ -6,16 +6,36 @@ const statusBgColor = {
   "Leído": "#ace8cdff",
 };
 
-export const BookStatus = () => {
-  const [bookState, setBookState] = useState(() => {
-    return localStorage.getItem("bookState") || "Por leer";
-  });
+const getStatusFromProgress = (progress) => {
+    if (progress === 0) return "Por leer";
+    if (progress > 0 && progress < 100) return "En progreso";
+    return "Leído";
+  };
+
+export const BookStatus = ({ id, progreso, onEstadoChange }) => {
+  const [bookState, setBookState] = useState(getStatusFromProgress(progreso));
+  
+
   useEffect(() => {
-    localStorage.setItem("bookState", bookState);
-  }, [bookState]);
+    const savedState = localStorage.getItem(`bookState_${id}`);
+    if (savedState) {
+      setBookState(savedState);
+    } else {
+      const initialState = getStatusFromProgress(progreso);
+      setBookState(initialState);
+      localStorage.setItem(`bookState_${id}`, initialState);
+    }
+    const nuevoEstado = getStatusFromProgress(progreso);
+  if (nuevoEstado !== savedState) {
+    setBookState(nuevoEstado);
+    localStorage.setItem(`bookState_${id}`, nuevoEstado);
+  }
+  if (onEstadoChange) onEstadoChange(getStatusFromProgress(progreso));
+  }, [id, progreso]);
 
   const handleChangeState = (e) => {
     setBookState(e.target.value);
+    localStorage.setItem(`bookState_${id}`, e.target.value);
   };
 
   return (
