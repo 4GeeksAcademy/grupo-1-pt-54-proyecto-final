@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dashboard } from "../components/Dashboard";
+import toast, { Toaster } from "react-hot-toast";
 
 export const Login = () => {
     const [email, setEmail] = useState("");
@@ -20,14 +20,16 @@ export const Login = () => {
 
             if (data.success) {
                 sessionStorage.setItem("token", data.access_token);
-                alert("Login exitoso");
-                navigate("/");
+                toast.success('Login exitoso!')
+                setTimeout(() => {
+                    navigate("/dashboard");
+                }, 2000);
             } else {
                 alert(data.message);
             }
         } catch (error) {
             console.error("Error en login:", error);
-            alert("Hubo un error en la conexión con el servidor.");
+            toast.error("Hubo un error en la conexión con el servidor.");
         }
     };
 
@@ -35,7 +37,10 @@ export const Login = () => {
         <div
             className="container-fluid px-0 min-vh-100"
             style={{ backgroundColor: "lavender" }}
-        >
+        > <Toaster
+                position="top-center"
+                reverseOrder={false}
+            />
             <div className="row g-0 align-items-stretch">
                 <div className="col-12 col-lg-5">
                     <img
@@ -44,7 +49,9 @@ export const Login = () => {
                         className="img-fluid w-100"
                         style={{
                             objectFit: "cover",
-                            height: "633px"
+                            height: "633px",
+                            WebkitMaskImage: "linear-gradient(to right, black 75%, transparent 100%)",
+                            maskImage: "linear-gradient(to right, black 80%, transparent 100%)"
                         }}
                     />
                 </div>
@@ -85,13 +92,16 @@ export const Login = () => {
                             />
                         </div>
 
-                        <div className="text-center">
-                            <Link to="/dashboard"><button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
-                                Login
-                            </button></Link>
-
-
+                        <div className="text-center"><button type="button" onClick={handleSubmit} className="btn btn-outline-warning">
+                            Login
+                        </button>
                         </div>
+                        <Link className="icon-link icon-link-hover" to="/recuperacion" style={{ color: "black" , marginLeft: 270 , marginTop: 20}}>
+                            Olvidé mi contraseña
+                            <svg xmlns="http://www.w3.org/2000/svg" className="bi" viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z" />
+                            </svg>
+                        </Link>
                     </form>
                 </div>
             </div>

@@ -1,20 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import debounce from "lodash.debounce";
-import BookList from "./BookList"; 
+import toast, { Toaster } from "react-hot-toast";
 
 const SearchComponent = ({ onAddBook }) => {
   const [search, setSearch] = useState("");
   const [books, setBooks] = useState([]);
   const [mensaje, setMensaje] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [myBooks, setMyBooks] = useState([]); 
+  const [myBooks, setMyBooks] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const ENDPOINT = "/api/books/search";
-  const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
-  const coverUrlFrom = (cover_i) =>
-    cover_i
-      ? `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
-      : "/placeholder-book.png";
+
+  const coverUrlFrom = (cover_i) => `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg`
 
   const showData = async (query = "") => {
     try {
@@ -27,7 +24,7 @@ const SearchComponent = ({ onAddBook }) => {
       }
 
       const resp = await fetch(
-        `${BASE_API_URL}${ENDPOINT}?title=${encodeURIComponent(trimmed)}`
+        `${import.meta.env.VITE_BACKEND_URL}/api/books/search?title=${encodeURIComponent(trimmed)}`
       );
       if (resp.status === 304) {
         console.log("Response 304: Not Modified — reusing previous results.");
@@ -60,25 +57,43 @@ const SearchComponent = ({ onAddBook }) => {
     debouncedSearch(value);
   };
 
-  const pickSuggestion = (book) => {
-    setSearch(book.title);
-    setSuggestions([]);
-    setBooks([book]);
-  };
+  const handleAddBook = async (book) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: book.title,
+          author: book.author,
+          cover_i: book.cover_i,
+          sinopsis: book.description
+        })
+      });
 
-  const handleAddBook = (book) => {
-    // onAddBook(book);
-    setMyBooks((prev) => [...prev, book]); 
-  };
+      const data = await response.json();
 
-  const handleRemoveBook = (bookToRemove) => {
-    setMyBooks((prev) => prev.filter((b) => b.title !== bookToRemove.title));
+      if (data.success) {
+        setMyBooks(prev => [...prev, data.book]);
+        toast.success('Libro agregado correctamente')
+        setSuggestions([]);
+        setBooks([]);
+        setSearch("");
+        if (onAddBook) onAddBook(data.book);
+      } else {
+        toast.error("Error al agregar el libro")
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al conectar con el servidor")
+    }
   };
-
-  useEffect(() => {}, []);
 
   return (
     <div className="search-root">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      />
       <div className="search-bar-container">
         <input
           value={search}
@@ -93,14 +108,11 @@ const SearchComponent = ({ onAddBook }) => {
 
       <div className="books-list">
         {books.map((b) => (
-         <div key={b.id || b.key || b.title} className="book-card">
+          <div key={b.id || b.key || b.title} className="book-card" style={{ height: "80px" }}>
             <div className="book-cover">
               <img
                 src={coverUrlFrom(b.cover_i)}
                 alt={b.title}
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder-book.png";
-                }}
               />
             </div>
             <div className="book-body">
@@ -115,21 +127,17 @@ const SearchComponent = ({ onAddBook }) => {
                     id: b.id || b.key || Date.now(),
                     title: b.title,
                     author: b.authors || "Autor desconocido",
+                    cover_i: b.cover_i,
+                    description: b.description
                   })
                 }
               >
-                ➕ Agregar
+                <i className="fa-solid fa-plus"></i> Agregar
               </button>
             </div>
           </div>
         ))}
       </div>
-
-      {/* {myBooks.length > 0 && (
-        <div className="mt-5">
-          <BookList books={myBooks} onRemoveBook={handleRemoveBook} />
-        </div>
-      )} */}
     </div>
   );
 };

@@ -1,47 +1,72 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+
 
 export const LibroIndividual = () => {
   const { id } = useParams();
   const [libro, setLibro] = useState(null);
   const [progreso, setProgreso] = useState(0);
-  const [estado, setEstado] = useState("No leído");
+  const [estado, setEstado] = useState("Por leer");
+  const [loading, setLoading] = useState(true);
 
-  const fetchLibro = async () => {
-    const ENDPOINT = "/api/books/search";
-    const BASE_API_URL = import.meta.env.VITE_BACKEND_URL;
-    try {
-      const response = await fetch(`${BASE_API_URL}${ENDPOINT}?title=${id}`);
-      const data = await response.json();
-      setLibro(data);
-
-      if (data.progreso) {
-        setProgreso(data.progreso);
-        actualizarEstado(data.progreso);
-      }
-    } catch (error) {
-      console.error("Error fetching book details:", error);
-      setLibro(null);
-    }
+  const getEstadoDesdeProgreso = (valor) => {
+    if (valor === 0) return "Por leer";
+    if (valor > 0 && valor < 100) return "En progreso";
+    return "Leído";
   };
 
-  const actualizarEstado = (valor) => {
-    if (valor === 0) setEstado("No leído");
-    else if (valor > 0 && valor < 100) setEstado("En progreso");
-    else setEstado("Leído");
+  useEffect(() => {
+    if (!id || id.trim().length < 1) return;
+
+    const fetchLibro = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json"))
+          throw new Error("Respuesta no es JSON");
+
+        const data = await response.json();
+        setLibro(data);
+
+        const progresoNum = Number(data.progreso ?? 0);
+        setProgreso(progresoNum);
+        setEstado(getEstadoDesdeProgreso(progresoNum));
+      } catch (error) {
+        console.error("Error fetching book details:", error);
+        setLibro(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLibro();
+  }, [id]);
+
+  const actualizarProgreso = async (nuevoValor) => {
+    try {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/books/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progreso: nuevoValor }),
+      });
+      setLibro({ ...libro, progreso: nuevoValor });
+    } catch (error) {
+      console.error("Error al actualizar el progreso:", error);
+    }
   };
 
   const handleProgresoChange = (e) => {
     const nuevoValor = Number(e.target.value);
     setProgreso(nuevoValor);
-    actualizarEstado(nuevoValor);
+    const nuevoEstado = getEstadoDesdeProgreso(nuevoValor);
+    setEstado(nuevoEstado);
+    actualizarProgreso(nuevoValor);
   };
 
-  useEffect(() => {
-    fetchLibro();
-  }, [id]);
-
-  if (!libro) return <p>Cargando libro...</p>;
+  if (loading) return <p>Cargando libro...</p>;
+  if (!libro) return <p>No se encuentra el libro...</p>;
 
   const coverUrl = libro.cover_i
     ? `https://covers.openlibrary.org/b/id/${libro.cover_i}-L.jpg`
@@ -73,19 +98,7 @@ export const LibroIndividual = () => {
 
         <div style={{ marginBottom: "25px" }}>
           <label htmlFor="progreso" style={{ fontSize: "large", color: "darkslategray" }}>
-            Estado:{" "}
-            <strong
-              style={{
-                color:
-                  estado === "Leído"
-                    ? "green"
-                    : estado === "En progreso"
-                    ? "orange"
-                    : "gray",
-              }}
-            >
-              {estado}
-            </strong>
+            Progreso:
           </label>
           <input
             type="range"
@@ -97,18 +110,31 @@ export const LibroIndividual = () => {
             style={{
               width: "100%",
               marginTop: "10px",
-              accentColor: "darkolivegreen",
+              accentColor: "green",
               cursor: "pointer",
             }}
           />
           <p style={{ textAlign: "right", fontSize: "small", color: "#555" }}>
-            {progreso}%
+            {progreso}% - {estado}
           </p>
         </div>
 
-        <h4 className="display-4 blockquote" style={{ textAlign: "justify" }}>
-          {libro.sinopsis || "Sin sinopsis disponible."}
-        </h4>
+        <div
+          className="book-synopsis"
+          style={{
+            textAlign: "justify",
+            fontSize: "1.1rem",
+            color: "#444",
+            lineHeight: "1.6",
+          }}
+        >
+          {libro.sinopsis ? (
+            <ReactMarkdown>{libro.sinopsis}</ReactMarkdown>
+          ) : (
+            <em>Sin sinopsis disponible.</em>
+          )}
+        </div>
+
       </div>
     </div>
   );
