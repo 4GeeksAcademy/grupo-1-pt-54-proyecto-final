@@ -19,10 +19,10 @@ flask-admin = "*"
 typing-extensions = "*"
 wtforms = "==3.1.2"
 sqlalchemy = "*"
-eralchemy2="*"
 flask-jwt-extended = "*"
 flask-bcrypt = "*"
 flask-mail = "*"
+tomli = "*"
 
 [requires]
 python_version = "3.13"
