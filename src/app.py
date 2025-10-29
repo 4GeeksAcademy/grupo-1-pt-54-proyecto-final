@@ -200,14 +200,11 @@ def save_books(books):
 def get_books():
     books = load_books()
     for book in books:
-        # Si ya tiene image_url, se respeta
         if "image_url" not in book or not book["image_url"]:
             cover_id = book.get("cover_i")
             if cover_id:
-                # Generamos imagen de OpenLibrary
                 book["image_url"] = f"https://covers.openlibrary.org/b/id/{cover_id}-L.jpg"
             else:
-                # Imagen genérica si no hay portada
                 book["image_url"] = "https://via.placeholder.com/200x300?text=Sin+Portada"
     return jsonify(books), 200
 

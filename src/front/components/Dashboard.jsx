@@ -18,6 +18,9 @@ export const Dashboard = () => {
     useEffect(() => {
         fetchBooks();
     }, []);
+
+    localStorage.removeItem("access_token");
+
     return (
         <div style={{ backgroundColor: '#F8F9FA', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', margin: 0, padding: 0, minHeight: '82vh' }}>
             <div style={{ backgroundColor: '#2C3E50', color: 'white', position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
@@ -29,6 +32,11 @@ export const Dashboard = () => {
                 </div>
                 <div className="" style={{ width: "500px", padding: "0" }}>
                     <SearchComponent onAddBook={(newBook) => setBooks(prev => [...prev, newBook])} />
+                </div>
+                <div style={{ position: "absolute", top: "52%", left: "85%", transform: "translate(-50%, -50%)", zIndex: 1 }}>
+                    <Link to="/login" style={{ margin: "10px 0 0 150px", padding: "0 23px 0 23px", backgroundColor: "#614abbff", color: "white", textDecoration: "none", borderRadius: "20px", fontSize: "x-large" }}>
+                        Logout
+                    </Link>
                 </div>
             </div>
             <div style={{ marginTop: '48px', padding: '20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
