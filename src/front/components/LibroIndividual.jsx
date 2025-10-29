@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+
 
 export const LibroIndividual = () => {
   const { id } = useParams();
@@ -117,9 +119,22 @@ export const LibroIndividual = () => {
           </p>
         </div>
 
-        <h4 className="display-4 blockquote" style={{ textAlign: "justify" }}>
-          {libro.sinopsis || "Sin sinopsis disponible."}
-        </h4>
+        <div
+          className="book-synopsis"
+          style={{
+            textAlign: "justify",
+            fontSize: "1.1rem",
+            color: "#444",
+            lineHeight: "1.6",
+          }}
+        >
+          {libro.sinopsis ? (
+            <ReactMarkdown>{libro.sinopsis}</ReactMarkdown>
+          ) : (
+            <em>Sin sinopsis disponible.</em>
+          )}
+        </div>
+
       </div>
     </div>
   );
